@@ -4,4 +4,43 @@ Creation-Date: 2023-01-31T14:45:39+02:00
 
 ====== Базовая настройка сервера ======
 
+Из-под root выполнить 
 
+''omv-firstaid''
+
+Это делается сразу, пока к серверу ещё подключены монитор (по VGA) и клавиатура (USB).
+
+===== Configure network interface =====
+
+При установке это срабатывает автоматически, но если при установке OMV всё-таки был пропущен этап настройки сети, то вот. 
+
+Придётся редактировать sources.list (через основной редактор nano):
+
+1. nano /etc/apt/sources.list
+
+Пример правильного содержимого файла для релиза „buster”:
+''deb'' [[http://deb.debian.org/debian|''http://deb.debian.org/debian'']] ''buster main contrib non-free''
+''deb'' [[http://deb.debian.org/debian|''http://deb.debian.org/debian'']] ''buster-updates main contrib non-free''
+''deb'' [[http://security.debian.org/debian-security/|''http://security.debian.org/debian-security/'']] ''buster/updates main contrib non-free''
+
+2. Ctrl+O
+3. Enter
+4. Ctrl+X
+
+===== Configure web control panel =====
+
+Поменять на „''81''”.
+
+Это порт, по которому будет происходить обращение к серверу в сети.
+
+	Вероятно, позже захочется заходить на свой сервер снаружи. Провайдер предложит выбрать любой порт, кроме 80, 25 и 255 — они по-умолчанию используются многими сервисами.
+	
+	Заходить на OMV извне прямо по IP вроде //123.45.678.90:81//, но об этом ещё рано говорить, сперва надо настроить безопасность.
+
+===== Change control panel administrator password =====
+
+По-умолчанию это „''admin/openmediavault''”.
+
+Поменять на что-то очень, очень хардкорное.
+
+//Next step//: [[Проверить доступ к OMV из браузера]]
