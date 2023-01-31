@@ -43,4 +43,4 @@ System
 * Power Button = Выключить
 * [Save / Apply / Yes]
 
-//Next step//: [[Настройка доступа к NAS по hostname]]
+//Next step//: [[Настроить доступ к NAS по hostname]]
