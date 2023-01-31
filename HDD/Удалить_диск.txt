@@ -4,4 +4,16 @@ Creation-Date: 2023-02-01T00:26:17+02:00
 
 ====== Удалить диск ======
 
-//Next step//: 
+Если на диске есть shared folders, понадобится сперва узнать, какие и через что подключены. Некоторые надо выключить (удалить) в Services > SMB/CIFS. Другие будут находиться в Services > FTP > Shares. Затем уже надо последовательно загасить каталоги с удаляемого диска в Access Rights Management > Shared Folders > [Delete].
+
+Для проверки поглядывать в Access Rights Management > Shared Folders > Shared Folders In Use. Если какой-либо каталог из удаляемых всё ещё будет заявлен там как действующий — переубедить его целенаправленно в Access Rights Management > Shared Folders > Reset Permissions.
+
+В итоге установить Shared Folder = None > [Save], потому что упоминание какого-либо каталога в “Reset Permissions” тоже подразумевает, что он in use…
+
+И уже потом
+1. Storage > File Systems
+2. тыкнуть по диску, который надо выключить > Unmount
+
+Если NAS не подразумевает выдёргивание дисков «на лету», придётся дополнительно ещё и выключить NAS полностью.
+
+//Next step//: [[index]]
