@@ -13,11 +13,11 @@ Creation-Date: 2023-02-03T02:03:21+02:00
 
 Таким же образом ускорить логин по ssh на NAS:
 
-''alias nas='ssh $myUserName@192.168.1.20'''
+''alias nas='ssh login@192.168.1.20'''
 
 Можно сделать алиас для подключения к NAS с указанием определённого ssh-ключа c HDD:
 
-''alias nas='ssh $myUserName@192.168.1.20 -i /home/ssh_keys/nas/nas_astenix'''
+''alias nas='ssh login@192.168.1.20 -i /home/ssh_keys/nas/nas_astenix'''
 
 Но после закрытия окна с консолью алиас исчезнет. Чтобы он остался, нужно записать его в файл с инструкциями, который система читает при каждой своей загрузке — он называется “.bashrc” и находится в корне домашнего каталога каждого пользователя в Debian.
 
@@ -34,7 +34,7 @@ Creation-Date: 2023-02-03T02:03:21+02:00
 '''
 alias upd='sudo aptitude update && sudo aptitude upgrade'
 '''
-''alias nas='ssh myUserName@192.168.1.20'''
+''alias nas='ssh login@192.168.1.20'''
 ''и так далее''
 
 Чтобы изменения применились, надо перелогиниться.
