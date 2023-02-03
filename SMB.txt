@@ -1,0 +1,10 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-02-03T22:17:37+02:00
+
+====== SMB ======
+
+1. [[+Включить в OMV SMB CIFS]]
+2. [[+Добавить shared-каталог]]
+3. [[+Расшарить каталог по Samba]]
+4. [[+Удалить shared-каталог из Samba]]
