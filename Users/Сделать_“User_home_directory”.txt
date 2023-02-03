@@ -4,6 +4,32 @@ Creation-Date: 2023-02-03T02:00:34+02:00
 
 ====== Сделать “User home directory” ======
 
+Это нужно для сохранения настроек юзер-профилей и чтобы можно было логиниться на сервер по ssh и запускать от имени юзера тот же Midnight Commander — программам нужно записывать свои конфиги в какие-то каталоги.
 
+Три раза осторожнее в будущем с диском с каталогом “all_user_settings”. Если он исчезнет из OMV (поломался, вынули по ошибке или заменили), при логине по ssh потеряется возможность запускать ПО от имени залогиненного юзера, пойдут ошибки “Could not chdir to home directory”. Придётся аккуратно пересоздавать пользователей.
+
+В OMV есть опция импорта пользователей, но нет опции их экспорта. В консоли можно их грамотно экспортировать и собрать в файле для будущего импорта, но придётся повозиться чтобы не пропустить ни одного нужного поля. Возможно, поможет плагин openmediavault-backup, но я хз.
+
+Было бы здраво сделать каталог для настроек пользователей прямо на SSD сервера, бо это диск, который «случайно» не вынут. Но shares на нём невозможны.
+
+Новый каталог можно условно назвать “''all_user_settings''”.
+
+1. Access Rights Management > Shared Folders > [+Add] 
+
+Создать новый shared-каталог “all_user_settings”:
+* Permissions = Administrator: read/write, Users: read/write, Others: no access
+* [Save / Apply / Yes]
+
+Зайти в Privileges для этого каталога и поставить галочками права Read/Write для юзеров и групп.
+
+Зайти в ACL (Access Control List — список управления доступом) для этого каталога и поставить галочками Read/Write для юзеров:
+* Group = users > Read/Write/Execute
+* Others = none
+* Recursive = Apply
+
+Access Rights Management > User > Settings > User home directory
+* Enable = Yes,
+* Location = выбрать “all_user_settings”
+* [Apply / Yes]
 
 //Next step//: [[Добавить пользователей]]
