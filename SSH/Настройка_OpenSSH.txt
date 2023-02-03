@@ -4,4 +4,58 @@ Creation-Date: 2023-02-03T17:12:26+02:00
 
 ====== Настройка OpenSSH ======
 
-//Next step//: 
+В современных дистрибутивах сервис ssh называется „OpenSSH”. Как правило, он установлен и не активен, поэтому всё начинается с [[#Проверить статус сервиса SSH|проверки его статуса]] и запуска при необходимости. 
+
+Начнём с установки, бо это основа.
+
+===== Установить OpenSSH =====
+
+**manjaro**
+''sudo pacman -S openssh'' 
+
+**debian**
+''sudo apt-get install openssh''
+
+===== Настроить сервис =====
+
+Без явной необходимости править конфиг категорически не рекомендуется . 
+
+Но если надо:
+
+''sudo mcedit /etc/ssh/sshd_config''
+
+===== Запустить сервис SSH =====
+
+''sudo systemctl enable sshd.service && sudo systemctl start sshd.service && sudo systemctl status sshd.service''
+
+Сервис самостоятельно пропишется в автозапуске.
+
+===== Проверить статус сервиса SSH =====
+
+''sudo systemctl status sshd.service''
+
+По-умолчанию сервис OpenSSH должен быть отключён:
+
+''sshd.service - OpenSSH Daemon''
+''Loaded: loaded (/usr/lib/systemd/system/sshd.service; disabled; preset: disabled)''
+''Active:'' __''inactive''__ ''(dead)''
+
+Когда он включён:
+
+''sshd.service - OpenSSH Daemon''
+''Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: disabled)''
+''Active:'' __''active''__ ''(running) since Fri 2023-02-03 15:30:28 EET; 2h 37min ago''
+
+===== Проверить подключение =====
+
+Работоспособность подключения можно проверить на своём же компьютере — через подключение к localhost под своим же пользователем (условно «username») со своим же паролем:
+
+''ssh username@localhost''
+
+Ожидаем стандартное предупреждение о том, что хост неизвестен, вот его параметры, и на вопрос «Вы уверены?» пишем „yes”. 
+
+Произойдёт «вход на удалённый ресурс». Внешне в консоли может ничего не измениться.
+
+Завершение подключения через ssh в консоли — командой „exit”.
+
+//Next step//: [[Сделать личный ssh-ключ]]
