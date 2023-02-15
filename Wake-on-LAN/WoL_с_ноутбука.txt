@@ -6,6 +6,49 @@ Creation-Date: 2023-01-31T17:36:11+02:00
 
 Установить wakeonlan для будущего обращения к NAS.
 
+Debian
+
 ''sudo apt-get install wakeonlan''
+
+Manjaro
+
+Через Pamac.  
+
+В AUR есть ''wakeonlan, а ещё есть gwakeonlan — GTK и Python.'' 
+
+Обращение к удалённому устройству по MAC-адресу.
+
+'''
+#!/bin/bash
+	# Wake up NAS через роутер, 
+	# ждём 71 sec пока он проснётся, 
+	# открываем firefox с OMV. 
+	# Почему 71 — на самом деле нужно 70, но когда скрипт начинает работать, глаз замечает старт отсчёта обратного времени с 69-й секунды и мозг удивляется.
+
+firefox="/opt/firefox/firefox"
+    
+# Функция отсчёта времени
+function countdown(){
+for (( i=71; i>0; i--)); do
+	printf "\rОсталось $i секунд. Можно нажать AnyKey чтобы запинговать NAS немедленно."
+	read -s -n 1 -t 1 key
+	if [ $? -eq 0 ]
+	then
+		break
+	fi
+done
+}
+
+	# echo "Отослан сигнал пробуждения."
+wakeonlan B4:99:BA:BF:48:44
+
+countdown
+
+echo "\nПингование в цикле. После успешного ответа откроется firefox."
+ping 192.168.10.20 | grep from -m 1
+
+$firefox http://tower.local:92/
+'''
+
 
 //Next step//: 
