@@ -3,7 +3,7 @@ version=0.4
 name=NAS
 interwiki=
 home=Home
-icon=./icon/nas.png
+icon=./icon/icona.ico
 document_root=
 short_links=False
 shared=True
@@ -16,12 +16,14 @@ notebook_layout=files
 [TaskListPlugin]
 all_checkboxes=True
 labels=FIXME, TODO
+waiting_labels=Waiting, Planned
+nonactionable_tags=
 integrate_with_journal=start
 included_subtrees=
 excluded_subtrees=
-nonactionable_tags=
-tag_by_page=False
+show_pages=True
 use_workweek=False
+tag_by_page=False
 
 [JournalPlugin]
 namespace=Journal
