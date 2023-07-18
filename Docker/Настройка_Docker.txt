@@ -1,0 +1,196 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-10T19:05:59+03:00
+
+====== Настройка Docker ======
+
+''Services''
+''> Compose''
+''> Files''
+
+===== Настроить Docker (compose) в OMV =====
+
+В меню OMV появляется новый пункт:
+
+''Services''
+''> Compose''
+''> Settings''
+
+Compose Files
+	* Shared folder = containers [docker]
+	* Owner = mydocker 
+	* Group of directories = docker
+	* Permissions = Everyone - read/write
+
+Data
+	* Shared folder = appdata [docker]
+
+Backup
+	* пропустим
+
+Docker
+		Убедиться, что 
+	* Docker storage = вместо ’/var/lib/docker’ указать полный путь к ’containers [docker]’ вроде /srv/dev-disk-by-uuid-fbd681fd-e0cc-479d-b62f-5544f10f4317/docker/containers
+	* Status = Installed and running
+	* Docker version = ожидаемая
+	
+=== Сохранить настройки ===
+
+	1. Save > Apply
+	2. [Restart Docker] > Yes (это самое важное)
+
+===== Установить Portainer =====
+
+	Это web-ui для управления Docker. Аналоги: DockerUI, Shipyard.
+
+	Может покрыть 80% задач, остальное таки в консоль. 
+
+	Portainer поставляется в виде докер-контейнера. 
+
+''System'' 
+''> OMV-Extras'' 
+''> Docker'' 
+''> [Portainer]'' 
+''> [+ Install]''
+''[Open Portainer]''
+
+http://NAS_IP:9000/#!/init/admin
+
+Предлагается создать нового пользователя. Юзаем уже созданного «//mydocker//».
+
+		Установка Portainer для  управления docker-хостом
+		
+		Шаг 1. Создать папку для хранения данных, которые не желательно терять.
+		
+		mkdir /root/portainer/data
+		Copy
+		
+		Шаг 2. Запустить контейнер, пробросить в него папку для данных, сокет для доступа к докеру и порт для доступа.
+		
+		docker run --name portainer -d -p 9000:9000 -v /root/portainer/data:/data -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
+		Copy
+		
+		Шаг 3.
+		
+		Portainer GUI: http://<serverip>:9000
+		Copy
+		
+		Остановка, перезапуск, удаление и переустановка Portainer
+		
+		Далее можно манипулировать контейнером уже по имени, указанному во время запуска, в моём случае это —name portainer. Например:
+		
+		docker stop portainer
+		Copy
+		
+		docker start portainer
+		Copy
+		
+		Для того, чтобы Portainer стартовал при загрузке системы, нужно немного видоизменить команду запуска, добавив —restart=always. Если контейнер уже был создан — предварительно его удалить. Не нужно бояться потери данных, так как они вынесены из контейнера в папку хоста из шага 1.
+		
+		docker rm portainer
+		Copy
+		
+		docker run --name portainer --restart=always -d -p 9000:9000 -v /root/portainer/data:/data -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer
+		Copy
+		
+		Теперь можно перезагрузить сервер и убедиться, что контейнер с Portainer загружается автоматически. Если перезагрузка не допустима, то можно просто остановить и запустить сам докер.
+		
+		service docker stop
+		Copy
+		
+		service docker start
+		Copy
+		
+		В одной из следующих заметок я расскажу про свои настройки брандмауэра с помощью iptables при работе с докером.
+		Post Views: 9 169
+		Читайте также
+
+===== Установить из OMV Cockpit =====
+
+	Это web-ui для мониторинга, настройки и обслуживания виртуальных серверов в Linux через веб-браузер, позволяет управлять дисковым пространством, сетевыми подключениями, логами, контейнерами для Docker, пользовательскими учетными записями и тд. В stable Debian не входит.
+
+Portainer — Container tools management UI for Docker. 
+
+Cockpit — Cloud Content Management System, API-driven CMS for developers. Manage content like collections, regions, forms and galleries which you can reuse anywhere on your website.
+
+Не заморачиваемся и учимся использовать оба инструмента.
+
+	Ещё одной альтернативой Portainer будет Yacht, который сейчас заявлен как (alpha), поэтому его не трогаем.
+
+''System'' 
+''> OMV-Extras'' 
+''> Cockpit'' 
+''> [+ Install]''
+
+Открыть http://ip:9090/
+
+Залогиниться под докер-юзером из OMV.
+
+===== Добавить ssh в Docker =====
+
+After running through the commands above let’s test out how to use ssh when connecting to a docker container. For this example we will begin by creating the following docker compose file.
+
+version: '3.9'
+
+services:
+		openssh:
+				image: linuxserver/openssh-server
+				ports:
+						- "2222:2222"
+				environment:
+						- PUBLIC\_KEY=./id\_ecdsa.pub
+						- USER\_NAME=user
+				volumes:
+						- ./config:/config
+				networks:
+						default:
+								ipv4\_address: 172.21.0.10
+								aliases:
+										- openssh-server
+networks:
+		default:
+				ipam:
+						config:
+								- subnet: 172.21.0.0/24
+
+This example uses the linuxserver/openssh-server docker image. The image uses port 2222 and supports the following environment variables to make the ssh docker container function as desired.
+
+	\begin{itemize}
+	\item PUBLIC\_KEY – The location of the public key to be copied to the server. The matching private key can then be used for the authentication.
+	\item PASSWORD\_ACCESS – The default is false, but we will run through an example of using ssh when password access is allowed.
+	\item USER\_PASSWORD – The password for the user connecting with ssh.
+	\item USER\_NAME – The user that will be connecting to the ssh server.
+	\end{itemize}
+
+
+After running docker-compose up --build you can ssh into the running container with the following command:
+
+ssh -p 2222 user@172.21.0.10
+
+Note that port 22 is the default port for the ssh command, so in this case it has to be explicitly stated by using the -p 2222 option.
+docker ssh password
+
+To test the openssh docker container with an ssh key instead of a password, remove the USER\_PASSWORD and PASSWORD\_ACCESS variables. Make sure to include your public key in the config/.ssh/authorized\_keys directory that is mounted. After a successful test you should see the following result.
+docker ssh key
+
+In testing this docker container you may run across the following error:
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the ECDSA key sent by the remote host is
+SHA256:EgScdNs2FNfQxc3BTGXjI+6f/S6+XUNan6zIgHhZ94Q.
+Please contact your system administrator.
+Add correct host key in /home/misterpki/.ssh/known_hosts to get rid of this message.
+Offending ECDSA key in /home/misterpki/.ssh/known_hosts:1
+  remove with:
+  ssh-keygen -f "/home/misterpki/.ssh/known_hosts" -R "[172.21.0.10]:2222"
+ECDSA host key for [172.21.0.10]:2222 has changed and you have requested strict checking.
+Host key verification failed.
+
+This “Host key verification failed” error happens when the host key has changed on the openssh server. For this test, simply follow the instructions to remove the already trusted key from the known\_hosts file. If this error is encountered in the wild, first make sure to verify the host key change was valid and not malicious before proceeding.
+
+//Next step//: [[Импорт контейнеров]] 

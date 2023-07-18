@@ -1,0 +1,144 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-10T16:29:22+03:00
+
+====== Про установку Docker ======
+
+\section{Узнать версию Debian}
+
+\begin{lstlisting}[caption={Узнать версию Debian}]
+lsb_release -d && cat /etc/debian_version
+\end{lstlisting}
+
+У меня Debian 11.2 (bullseye). Значит, нужные мне файлы находятся на \url{https://download.docker.com/linux/debian/dists/bullseye/}
+
+\section{Убрать любые предыдущие версии Docker}
+
+\begin{lstlisting}[caption={Убрать предыдущие версии Docker}]
+sudo apt remove docker docker-engine docker.io containerd runc
+sudo apt update
+\end{lstlisting}
+
+\subsection{Как удалить существующий ключ OpenPGP}
+Также надо удалить и старые gpg-ключи, если они есть.
+
+Сперва лёгкий способ: зайти в /etc/apt/trusted.gpg.d/ и посмотреть, нет ли там gpg-файлов с именем вроде docker.gpg. Если есть \tire sudo удалить. Заодно убрать всё, что кажется стрёмным.
+
+Теперь посложнее. 
+\begin{enumerate}
+	\item Посмотреть полный список gpg-ключей в системе: \console{apt-key list}
+	\item Прочитать всё и принять решение о том, какие ключи следует удалять. Удалять так: \console{sudo apt-key del <KEY-ID>}
+\end{enumerate}
+
+Пример: 
+\begin{lstlisting}[caption={Пример устаревшего ключа Skype}]
+pub rsa2048 2016-06-22 [SC] [просрочен с: 2021-06-21]
+D404 0146 BE39 7250 9FD5  7FC7 1F30 45A5 DF75 87C3
+uid [ просрочен ] Skype Linux Client Repository <se-um@microsoft.com>
+\end{lstlisting}
+
+\englishq{key ID} это последние восемь символов из строки с GPG key's fingerprint. В моём случае \russianq{DF75 87C3}. Уберём пробел и:
+
+\begin{lstlisting}[caption={Удаление устаревшего ключа Skype}]
+sudo apt-key del DF7587C3
+\end{lstlisting}
+
+\subsection{Разрешить APT подключаться к репозиториям по HTTPS}
+
+Похоже, что это deprecated, добавление gpg-ключей уже не делается через apt. Можно скипнуть, можно выполнить.
+
+\begin{lstlisting}[caption={Подключение APT к репозиториям по HTTPS}]
+sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+\end{lstlisting}
+
+\section{Добавить Docker-ключ GPG}
+\begin{think}
+Собственно ключи надо скачивать через HTTPS куда-нибудь, где права на запись только у root. Например, в /usr/share/keyrings/. А управлять ими надо через файлы в каталоге /etc/apt/trusted.gpg.d/.
+
+Рекомендуется указать в имени ключа репозиторий, из которого он взят, и указание \englishq{archive-keyring}. То есть, ключ для докера будет называться docker-archive-keyring.gpg.
+
+Открытый ключ надо ascii-деарморировать (снять защитную броню), сохранить в файл /usr/share/keyrings/docker-archive-keyring.gpg, затем выдать по-максимуму правов на его чтение. Он же публичный.
+\end{think}
+
+\begin{lstlisting}[caption={Скачать GPG key of Docker}]
+sudo curl -fsSL "https://download.docker.com/linux/debian/gpg" | sudo gpg --dearmor --yes -o /usr/share/keyrings/docker-archive-keyring.gpg
+sudo chmod a+r /usr/share/keyrings/docker-archive-keyring.gpg
+\end{lstlisting}
+
+Объяснение:
+
+\begin{itemize}
+\item Утилитой curl скачивается gpg-файл (ключ)
+\item командой gpg вызывается утилита для управления ключами OpenPGP
+\item команда --dearmor (снять броню) распаковывает информацию из ключа в формате ASCII
+\item данные записываются в файл docker-archive-keyring.gpg
+\item и прописываются права на доступ к нему буквально как \englishq{grant read permission to all users on this file in addition to whatever other permissions are set}. Обратной была бы команда chmod g-w = \englishq{remove write permission to all users in the same group on this file in addition to whatever other permissions are set}.
+\end{itemize}
+
+\section{Добавить репозиторий Docker в sources.list}
+
+Не надо редактировать файл \ordinaryq{/etc/apt/sources.list}. 
+
+Надо создать новый файл в каталоге \ordinaryq{/etc/apt/sources.list.d} с содержимым, значения которого будут взяты из нескольких системных переменных:
+
+\begin{lstlisting}[caption={Добавить файл docker.list}]
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && sudo apt update 
+\end{lstlisting}
+
+Прочитать результат прямо из созданного файла:
+\begin{lstlisting}[caption={Прочитать содержимое файла docker.list}]
+cat /etc/apt/sources.list.d/docker.list
+	# Ответ соответствует системе на моём ноуте:
+	# deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian bullseye stable
+\end{lstlisting}
+
+\section{Установить stable Docker}
+
+\begin{lstlisting}[caption={Установка stable docker}]
+ sudo apt-get update
+ sudo apt-get install docker-ce docker-ce-cli containerd.io
+\end{lstlisting}
+
+Проверить корректность работы: \console{sudo docker run hello-world}
+ 
+Ждём в ответ \englishq{Hello from Docker! This message shows that your installation appears to be working correctly.}
+
+Установка определённых версий делается по официальному мануалу\footnote{~\url{https://docs.docker.com/engine/install/debian/}}.
+
+\section{Удаление Docker }
+\begin{lstlisting}[caption={Удаление docker}]
+sudo apt-get purge docker-ce docker-ce-cli containerd.io
+\end{lstlisting}
+
+Чтобы удалить вообще всё: \console{sudo rm -rf /var/lib/docker \&\& sudo rm -rf /var/lib/containerd}
+
+Если были изменены какие-либо конфигурационные файлы, их тоже надо удалять вручную.
+
+% \subsection{install the latest version of Docker CE and containerd.}
+% 
+% \begin{lstlisting}[caption={TITLE}]
+% sudo apt install docker-ce docker-ce-cli containerd.io
+% \end{lstlisting}
+% 
+% \subsection{Verifying Docker installation}
+% 
+% \begin{lstlisting}[caption={TITLE}]
+% sudo docker run hello-world	
+% \end{lstlisting}
+% 
+% \subsection{Install a certain version of Docker CE}
+% 
+% Узнать все доступные версии
+% \begin{lstlisting}[caption={TITLE}]
+% apt-cache madison docker-ce
+% \end{lstlisting}
+% 
+% Once you’ve made your mind, time to install that version! Run the following command –
+% 
+% \begin{lstlisting}[caption={TITLE}]
+% sudo apt-get install docker-ce=<VERSION_STRING> docker-ce-cli=<VERSION_STRING> containerd.io
+% \end{lstlisting}
+% 
+% Here, the <VERSION_STRING> should be replaced with something like “18.06.0~ce~3-0~ubuntu” (without quotes).
+
+

@@ -1,0 +1,132 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-10T19:05:48+03:00
+
+====== Установка Docker ======
+
+Прежде чем устанавливать Docker в OMV, есть смысл погонять его на своём ноуте.
+
+	Пример: https://habr.com/ru/post/188362/ Как всё настроить по-быстрому" — это отдельная тема. Основы и установка просты, но с конфигами придётся повозиться.
+
+===== Установить Docker =====
+
+==== Обновить OMV по-максимуму ====
+
+''System'' 
+''> Update Management'' 
+''> [Check]''
+
+==== Прописать/проверить DNS server ====
+
+	Если IP-адрес NAS в настройках роутера был динамическим, то добавление гугловского днс этот IP-адрес поменяет. Если он уже был прописан, то вряд ли, но всё равно придётся глянуть для уверенности и проверить соеднение по ssh.
+
+	Если к NAS был предопределён доступ извне по IP, то IP-адрес будет изменён наверняка.
+
+''8.8.8.8'' — это DNS Google. 
+
+	Можно указать другой, если есть под рукой.
+
+'''
+Network 
+> Interfaces 
+> отредактировать существующее подключение (Ethernet, конечно же) 
+> Advanced settings 
+> DNS servers = 8.8.8.8
+'''
+
+==== Создать нового юзера только для Docker ====
+
+Это НЕ должен быть существующий root или юзер с ролью admin, поэтому надо сделать нового ([[Users:Добавить пользователей]]). Назовём его //mydocker.//
+
+	Трижды перепроверить правильность пароля у этого юзера, иначе потом будут траблы на ровно месте.
+
+Добавить нового юзера //mydocker// в группы 
+	* users
+	* docker
+	* sudo
+	* ssh
+
+Проверить, что //mydocker// может зайти на NAS через ssh. Для этого надо будет [[SSH:Сделать личный ssh-ключ]].
+
+	Его можно сделать или локально, или непосредственно на NAS.
+
+==== Убедиться в наличии ’User home directory’ ====
+
+При первой настройке пользователей она была включена, но всё-таки.
+
+'''
+Users
+> Settings 
+User Home directory = Enabled
+'''
+
+==== Создать shared-каталоги для Docker ====
+
+Можно положить их на один диск, nevermind:
+
+	1. docker/appdata
+	2. docker/downloads
+	3. docker/media
+	4. docker/containers (это каталог для плагина compose)
+
+TODO ! Эту заметку сохранить или удалить?
+
+	This really needs to be on a larger data drive, as these folders can get large. If you are setting up for the first time, you'll also need the absolute path to this folder (click the 4 squares in the upper right, put a check next to absolute path). 
+
+	Click the copy icon at the end of this path and just save it in a text file for now.
+
+Последовательно сделать их всех shared — [[SMB:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+
+==== Установка Docker ====
+
+=== Установить плагин //openmediavault-resetperms// ===
+
+В будущем настройки прав для каталога «appdata» придётся сбрасывать неоднократно, Docker иногда по-своему перезаписывает права доступа.
+
+''System'' 
+''> Plugins''
+''> Поиск'' //''openmediavault-resetperms''//
+''> Установить''
+
+Использовать: 
+''Access Rights Management'' 
+''> Shared Folders'' 
+''> Reset Permissions''
+
+=== Установить плагин OMV-Extras ===
+
+В OMV Docker приходит через установку плагина OMV-Extras — [[omv-extras]]
+
+В итоге 
+* должен появиться новый пункт меню: System > //omv-extras//
+* в списке плагинов (System > Plugins) появляются новые плагины.
+
+=== Включить Docker repo ===
+
+''System'' 
+''> omv-extras''
+''поставить галочку для Docker-repo (вероятно, она уже поставлена)''
+
+Кликнуть по [apt-clean] и дождаться финиша.
+
+''System > Plugins''
+
+=== Установить плагин //openmediavault-compose// ===
+
+''System'' 
+''> Plugins'' 
+''> установить плагин'' //''openmediavault-compose''//
+
+=== Проверить установленный Docker ===
+
+Зайти на NAS по ssh и последовательно запросить информацию:
+
+	1. ''docker --version''
+	2. ''docker-compose --version''
+	3. ''sudo docker info | grep Root''
+
+Ожидаемый ответ после последней команды: 
+
+''Docker Root Dir: /var/lib/docker''
+
+//Next step//: [[Настройка Docker]]

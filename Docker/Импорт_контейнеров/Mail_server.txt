@@ -1,0 +1,40 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-10T16:02:57+03:00
+
+====== Mail server ======
+
+Хочу поднять почтовый сервер на моём NAS.
+
+Нужен docker.
+
+Почтовый сервер: [[https://hub.docker.com/r/mailserver/docker-mailserver|Docker Mailserver]]. 
+
+	A production-ready fullstack but simple containerized mail server (SMTP, IMAP, LDAP, Antispam, Antivirus, etc.). Only configuration files, no SQL database. Keep it simple and versioned. Easy to deploy and upgrade. The documentation for the latest stable release is hosted on GitHub Pages.
+
+===== Добавить контейнер =====
+
+'''
+Services 
+> Compose 
+> Files
+> [+ Add From URL]
+'''
+	* url = https://hub.docker.com/r/mailserver/docker-mailserver
+	* Name = docker-mailserver
+	* Save / Apply
+
+Кликнуть по строке с docker-mailserver > Check
+
+Если есть ошибки: надо сперва грамотно отредактировать конфигурационный файл. 
+
+Пример ошибки
+
+	**500 - Internal Server Error**
+	Failed to execute command 'export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin; export LANG=C.UTF-8; export LANGUAGE=; docker-compose --file '/srv/dev-disk-by-uuid-fbd681fd-e0cc-479d-b62f-951b510f4317/docker/containers/docker-mailserver/docker-mailserver.yml' --env-file '/srv/dev-disk-by-uuid-fbd681fd-e0cc-479d-b62f-951b510f4317/docker/containers/docker-mailserver/docker-mailserver.env' config 2>&1': parsing /srv/dev-disk-by-uuid-fbd681fd-e0cc-479d-b62f-951b510f4317/docker/containers/docker-mailserver/docker-mailserver.yml: yaml: line 47: mapping values are not allowed in this context 
+
+Кликнуть по строке с docker-mailserver > Edit
+
+
+
+Если нет ошибок — запустится.

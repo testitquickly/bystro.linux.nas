@@ -1,0 +1,115 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-13T16:12:27+03:00
+
+====== Установить mail server Zimbra ======
+
+Обычно такие штуки поднимают на отдельных компьютерах. В этом случае надо поднять отдельный веб-сервис на компьютере, на котором уже работает OMV, и при этом надо умудриться не «поломать» OMV…
+
+Подразумевается, что NAS с OMV успешно работает по ''192.168.50.10''. 
+
+**Задача**: поднять веб-сервис Zimbra по этому же адресу, но на отдельном порту. 
+
+[[https://www.youtube.com/watch?v=K1PyAjL_9jo|Видеоурок]] по установе Zimbra на виртуальный компьютер.
+
+===== Подготовка =====
+
+==== Обновить систему ====
+
+если есть что обновлять: 
+
+''System > Update Management > Update''
+
+Зайти по ssh на NAS.
+
+==== Установить dnsmasq ====
+
+''sudo apt install dnsmasq''
+
+==== Создать новый файл hosts ====
+
+В OMV файл /etc/hosts редактируется системой, поэтому трогать его не надо — она его в какой-то момент перезапишет. Поэтому создадим новый файл, назовём его //hostsmail// (название может быть любым) и положим куда-то в свои каталоги.
+
+Содержимое:
+
+''# hosts         This file describes a number of hostname-to-address''
+''#               mappings for the TCP/IP subsystem.  It is mostly''
+''#               used at boot time, when no name servers are running.''
+''#               On small systems, this file can be used instead of a''
+''#               "named" name server.''
+''# Syntax:''
+''#''
+''# IP-Address  Full-Qualified-Hostname  Short-Hostname''
+''#''
+''# 192.168.1.29 mydomain.duckdns.org. jellyfin.mydomain.duckdns.org. omv.mydomain.duckdns.org. nas.mydomain.duckdns.org''
+''# special IPv6 addresses''
+
+''192.168.50.10:999 mail.tower.local''
+
+''#use 'sudo killall -9 dnsmasq' to kill process''
+''#use 'sudo dnsmasq' to start process''
+
+==== (skip) Изменить файл hostname ====
+
+	Это скипнуть.
+	 
+		Это может быть нужно только если на сервере поднята отдельная система.
+		
+		''mcedit /etc/hostname''
+
+		Вписать туда новое имя, например: ''mailserver''
+
+==== (skip) Отключить разрешенную службу ====
+
+	Это скипнуть. 
+
+		/etc/resolv.conf управляется OMV, и связь с гугловским DNS 8.8.8.8 в нём уже прописана.
+	
+	''sudo systemctl disable systemd-resolved''
+	''sudo systemctl stop systemd-resolved''
+	''ls -lh /etc/resolv.conf''
+	''sudo unlink /etc/resolv.conf''
+	''echo nameserver 8.8.8.8 | sudo tee /etc/resolv.conf''
+
+==== (skip) Изменить файл dnsmasq.conf ====
+
+'''
+sudo mcedit /etc/dnsmasq.conf
+'''
+
+По-умолчанию там всё закомментировано.
+
+Добавить туда где-то в начале:
+
+''server=192.168.50.11''
+''listen-address=192.168.50.11''
+''listen-address=127.0.0.1''
+''domain=tower.local''
+''mx-host=tower.local,mail.tower.local,0''
+''address=/mail.tower.local/192.168.50.11''
+
+===== Установка =====
+
+==== Скачать репозиторий Zimbra ====
+
+В браузере убедиться в том, что на https://www.zimbra.com/downloads/zimbra-collaboration-open-source/ есть что-то, что можно скачать. Снимем то, что предлагается для самой новой Ubuntu.
+
+Скопировать линк на архив (вроде https://files.zimbra.com/downloads/8.8.15_GA/zcs-8.8.15_GA_4179.UBUNTU20_64.20211118033954.tgz)
+
+Вернуться в консоль на NAS
+
+''wget LINK''
+
+==== Распаковать ====
+
+tar -xvf ./ФАЙЛ_.tgz
+
+==== Перейти в распакованную директорию ====
+
+cd ИМЯ_КАТАЛОГА
+
+==== Запустить скрипт установки ====
+
+''./install.sh''
+
+

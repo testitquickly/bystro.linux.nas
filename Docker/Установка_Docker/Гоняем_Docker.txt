@@ -1,0 +1,231 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-07-12T10:22:33+03:00
+
+====== Гоняем Docker ======
+
+===== Установить docker в систему =====
+
+Следуем этому источнику: https://docs.docker.com/engine/
+
+	Установка docker в Debian работает норм. 
+	
+	Установка docker в Arch (и Manjaro) экспериментальная и полна неочевидностей — https://docs.docker.com/desktop/install/archlinux/
+
+===== Install client binaries =====
+
+Docker does not have an Arch package repository. Binaries not included in the package must be installed manually before installing Docker Desktop.
+
+1. Go to https://download.docker.com/linux/static/stable/
+2. choose your hardware platform — https://download.docker.com/linux/static/stable/x86_64/
+3. download the .tgz file relating to the version of Docker Engine you want to install.
+4. ''tar xzvf /path/to/<FILE>.tar.gz''
+5. Move the binaries to a directory on your executable path, such as /usr/bin/
+	a. ''sudo cp docker/* /usr/bin/''
+6. Start the Docker daemon (терминал можно закрыть):
+	a. ''sudo dockerd &''
+7. В новом окне терминала проверить, что Docker установлен и работает адекватно:
+	a. sudo docker run hello-world
+	b. Поскольку образ контейнера //hello-world// у нас отсутствует, он будет скачан из сети.
+	c. When the container runs, it prints a //hello// message and exits.
+8. НЕ НАДО ставить ''docker-compose'' (define and run multi-container applications with Docker), иначе позже возникнет неразрешимый конфликт. Compose будет установлено «само» далее.
+
+==== Upgrade static binaries ====
+
+To upgrade your manual installation of Docker Engine, first stop any //dockerd// processes running locally, then follow the regular installation steps to install the new version on top of the existing version.
+
+===== Install Docker Desktop =====
+
+У меня KDE. Надо предварительно установить gnome-terminal:
+
+''sudo pacman -S gnome-terminal''
+
+Сlient binaries уже установлены. 
+
+==== Скачать Arch package для Docker Desktop ====
+
+* https://docs.docker.com/desktop/release-notes/ — скачать последний релиз ДЛЯ ARCH, это файл типа ''*.pkg.tar.zst''
+
+==== Установить ====
+
+''sudo pacman -U ./docker-desktop-<version>-<arch>.pkg.tar.zst''
+
+Если скажут Найдено 3 поставщика для qemu>=5.2.0:
+:: Repository extra
+1) qemu-base  2) qemu-desktop  3) qemu-full
+
+Выбрать 3).
+
+===== Launch Docker Desktop =====
+
+To start Docker Desktop for Linux, search Docker Desktop on the Applications menu and open it. This launches the Docker menu icon and opens the Docker Dashboard, reporting the status of Docker Desktop.
+
+Alternatively, open a terminal and run:
+
+ ''systemctl --user start docker-desktop''
+
+When Docker Desktop starts, it creates a dedicated context that the Docker CLI can use as a target and sets it as the current context in use. This is to avoid a clash with a local Docker Engine that may be running on the Linux host and using the default context. On shutdown, Docker Desktop resets the current context to the previous one.
+
+The Docker Desktop installer updates Docker Compose and the Docker CLI binaries on the host. It installs Docker Compose V2 and gives users the choice to link it as docker-compose from the Settings panel. Docker Desktop installs the new Docker CLI binary that includes cloud-integration capabilities in /usr/local/bin/com.docker.cli and creates a symlink to the classic Docker CLI at /usr/local/bin.
+
+Можно не логиниться в сервис docker и запустить контейнеры только локально. Если таки надо залогиниться, то надо сперва сгенерировать pgp-ключ. См. https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users
+
+===== Проверить установку =====
+
+After you’ve successfully installed Docker Desktop, you can check the versions of these binaries by running the following commands:
+
+* ''docker compose version''
+* ''docker --version'' (кратко) или ''docker version'' (детально)
+
+==== To enable Docker Desktop to start on login ====
+
+from the Docker menu, select Settings > General > Start Docker Desktop when you log in.
+
+Alternatively, open a terminal and run:
+
+''systemctl --user enable docker-desktop''
+
+===== To stop Docker Desktop =====
+
+select the Docker menu icon to open the Docker menu and select Quit Docker Desktop.
+
+Alternatively, open a terminal and run:
+
+''systemctl --user stop docker-desktop''
+
+===== Linux post-installation steps for Docker Engine =====
+
+См. https://docs.docker.com/engine/install/linux-postinstall/
+
+==== Manage Docker as a non-root user ====
+
+The Docker daemon binds to a Unix socket, not a TCP port. By default it’s the root user that owns the Unix socket, and other users can only access it using sudo. The Docker daemon always runs as the root user.
+
+If you don’t want to preface each docker command with sudo, create a Unix group called docker and add users to it. When the Docker daemon starts, it creates a Unix socket accessible by members of the docker group. On some Linux distributions, the system automatically creates this group when installing Docker Engine using a package manager. In that case, there is no need for you to manually create the group.
+
+	Warning
+
+	The docker group grants root-level privileges to the user. For details on how this impacts security in your system, see Docker Daemon Attack Surface.
+
+	Note
+
+	To run Docker without root privileges, see Run the Docker daemon as a non-root user (Rootless mode).
+
+To create the docker group and add your user:
+
+	Create the docker group.
+
+''sudo groupadd docker''
+
+Add your user to the docker group.
+
+''sudo usermod -aG docker $USER''
+
+Log out and log back in so that your group membership is re-evaluated.
+
+	If you’re running Linux in a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
+
+You can also run the following command to activate the changes to groups:
+
+ ''newgrp docker''
+
+Verify that you can run docker commands without sudo.
+
+ ''docker run hello-world''
+
+This command downloads a test image and runs it in a container. When the container runs, it prints a message and exits.
+
+If you initially ran Docker CLI commands using sudo before adding your user to the docker group, you may see the following error:
+
+WARNING: Error loading config file: /home/user/.docker/config.json -
+stat /home/user/.docker/config.json: permission denied
+
+This error indicates that the permission settings for the ~/.docker/ directory are incorrect, due to having used the sudo command earlier.
+
+To fix this problem, either remove the ~/.docker/ directory (it’s recreated automatically, but any custom settings are lost), or change its ownership and permissions using the following commands:
+
+ ''sudo chown "$USER":"$USER" /home/"$USER"/.docker -R''
+
+	 ''sudo chmod g+rwx "$HOME/.docker" -R''
+
+Configure Docker to start on boot with systemd
+
+Many modern Linux distributions use systemd to manage which services start when the system boots. On Debian and Ubuntu, the Docker service starts on boot by default. To automatically start Docker and containerd on boot for other Linux distributions using systemd, run the following commands:
+
+ ''sudo systemctl enable docker.service''
+
+ ''sudo systemctl enable containerd.service''
+
+To stop this behavior, use disable instead.
+
+ ''sudo systemctl disable docker.service''
+
+ ''sudo systemctl disable containerd.service''
+
+If you need to add an HTTP proxy, set a different directory or partition for the Docker runtime files, or make other customizations, see customize your systemd Docker daemon options.
+
+==== Configure default logging driver ====
+
+Docker provides logging drivers for collecting and viewing log data from all containers running on a host. The default logging driver, json-file, writes log data to JSON-formatted files on the host filesystem. Over time, these log files expand in size, leading to potential exhaustion of disk resources.
+
+To avoid issues with overusing disk for log data, consider one of the following options:
+
+	Configure the json-file logging driver to turn on log rotation.
+	Use an alternative logging driver such as the “local” logging driver that performs log rotation by default.
+	Use a logging driver that sends logs to a remote logging aggregator.
+
+===== Тренировка в контейнеризации =====
+
+==== Создать каталог для контейнеров ====
+
+''~/docker/containers''
+
+==== Создать каталог для проекта ====
+
+Создать файл test.py с содержимым //print("Hi world!")//
+
+''~/python-project/test.py''
+
+==== Создать новый контейнер ====
+
+Перейти в каталог ''~/docker/containers''
+
+=== Создать dockerfile ===
+ 
+//dockerfile// (без расширения, оно не нужно) — файл с инструкциями о сборке проектов. Положить его в текущий каталог, оно будет молча подхвачено.
+
+Содержимое: 
+
+	FROM - базовый образ, с которого начинается сборка, from the Ubuntu (ubuntu:18.04) or Python (python:3.11) etc
+	PULL — adds files from your Docker repository
+	RUN — выполнить какую-то команду (builds your container)
+	CMD — что нужно делать, когда будет запущен контейнер. Также есть команда ENTRYPOINT — делает то же, что и CMD, но не запускает bash
+	COPY — откуда—куда. Точка = текущая директория. 
+	WORKDIR — рабочая папка, в которой будет происходить вся работа
+
+Пример:
+
+''FROM python:3.11''
+''RUN mкdir -p ~/docker/containers/hello-cruel-world''
+''WORKDIR ~/docker/containers/hello-cruel-world''
+''COPY ~/python-project/ ~/docker/containers/hello-cruel-world''
+''CMD ["python", "test.py"]'' 
+
+=== Создать контейнер hello-cruel-world ===
+
+''docker build -t hello-cruel-world .''
+
+-t: название контейнера
+.: путь из которого в контейнер будут взяты файлы. Точка = "из текущей директории".
+
+==== Checking Individual Containers ====
+
+The status of individual containers is accessed via the docker ps command. This emits a table containing the details of all currently running containers.
+
+''docker ps''
+
+Combine the docker ps command with grep to easily check whether a specific container is running by ID or name:
+
+''docker ps | grep my-container-name''
+
+//Next step//: [[Установка Docker]]
