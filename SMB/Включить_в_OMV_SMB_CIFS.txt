@@ -4,4 +4,20 @@ Creation-Date: 2023-02-03T22:18:32+02:00
 
 ====== Включить в OMV SMB CIFS ======
 
-//Next step//: 
+''Services'' 
+''> SMB/CIFS'' 
+''> Settings''
+
+General settings:
+	* Enable = Yes
+	* Workgroup = оставить «WORKGROUP»
+
+Home directories:
+	* Enable = No
+	* Set browseable = Yes
+
+Advanced settings:
+	* Use sendfile = Yes
+	* Asynchronous I/O = Yes
+
+//Next step//: [[Добавить shared-каталог]]

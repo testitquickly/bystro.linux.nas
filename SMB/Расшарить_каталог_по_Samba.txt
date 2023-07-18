@@ -4,4 +4,21 @@ Creation-Date: 2023-02-03T22:19:34+02:00
 
 ====== Расшарить каталог по Samba ======
 
-//Next step//: 
+''Services'' 
+''> SMB/CIFS'' 
+''> Shares'' 
+''> [+ Add]''
+	* Enable = Да
+	* Shared folder = выбрать предлагаемый из списка \tire \textit{test}
+	* Comment= очень нужен, когда много каталогов
+	* Public = No
+	* Read only = No
+	* Browseable = Да
+	* Inherit ACLs = Да
+	* Hide dot files = Да
+
+Остальное не трогаем. 
+
+Со смартфона проверить появление каталогов на NAS для каждого пользователя по-отдельности можно через приложение «Cx Проводник» (оно же Cx File Explorer).
+
+//Next step//: [[Удалить shared-каталог из Samba]]
