@@ -1,0 +1,13 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-02-23T05:05:10+02:00
+
+====== In Progress ======
+[[+dhcp]]
+[[+go root]]
+[[+Mount Disk]]
+[[+ssh]]
+[[+UEFI]]
+[[+Как сделать ярлыки на исполняемые sh-файлы]]
+
+//Next step//: 
