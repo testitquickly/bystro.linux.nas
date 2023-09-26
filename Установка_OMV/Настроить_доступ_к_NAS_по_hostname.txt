@@ -26,7 +26,9 @@ System
 
 ==== Настройка /etc/hosts ====
 
-На своём ноуте “''sudo mcedit /etc/hosts''”.
+На своём ноуте
+
+''sudo mcedit /etc/hosts''
 
 	Под виндой надо сперва открыть блокнот от имени администратора, затем открыть файл ''c:\windows\system32\drivers\etc\hosts''
 
