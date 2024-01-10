@@ -1,0 +1,49 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-01-10T10:23:32+02:00
+
+====== Сделать короткий симлинк на HDD ======
+
+===== Задать симлинк =====
+
+''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media /srv/media''
+
+Or you could do it this way:
+
+''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c /srv/disk1''
+
+Then you can use
+
+'''
+/srv/disk1/media
+/srv/disk1/appdata
+'''
+
+===== Remove a Symlink: =====
+
+''rm'' /path/to/folder
+
+
+
+root@openmediavault:~# cd /
+root@openmediavault:/# sudo mkdir NAS
+root@openmediavault:/# 
+root@openmediavault:/# sudo chown -R ken:users /NAS
+root@openmediavault:/# ls -l | grep NAS
+drwxr-xr-x   2 ken  users  4096 Aug 29 11:52 NAS
+root@openmediavault:/# 
+
+Once the user has read/write permission on the directory.. the symlinks are a breeze. I only have two directories symlinked.. 1 is AppData (where all my /config folders are for docker)... and the other is /Media. I basically symlinked all my Media folders (movies, tv shows, books, music, etc.).. most of which I use for docker... under the media folder... Just pay attention when creating directories, etc... as if you're not careful you'll create them on your OS disk, and that could cause you a problem, especially if you have a small OS drive... easy way to check your symlinks are working properly, is to cd into the directory and ls -l, and it should look something like this (you can see the path it's symlinked to after the ->
+
+
+Code
+
+root@openmediavault:/NAS/Media# cd /NAS
+root@openmediavault:/NAS# ls -l
+total 0
+lrwxrwxrwx 1 root root 33 Apr 30 07:50 AppData -> /srv/dev-disk-by-label-D1/AppData
+root@openmediavault:/NAS# 
+
+Learn symlinks.. it will make your life way easier.
+
+//Продолжить//: [[Добавить HDD]]
