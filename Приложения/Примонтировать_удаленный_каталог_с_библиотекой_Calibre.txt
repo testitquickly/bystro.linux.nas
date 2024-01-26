@@ -1,0 +1,327 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-01-24T19:47:06+02:00
+
+====== Примонтировать удаленный каталог с библиотекой Calibre ======
+
+Что любопытно, для этого даже не надо устанавливать сервер Samba на своём ноуте.
+
+===== Теория =====
+
+Библиотеку Calibre можно запустить на NAS через Docker — получится постоянно доступная по домашней (а то внешней) сети библиотека, книги в которой будут организованы и постоянно храниться на NAS. Но это решение требует умения, у меня с пол-пинка поднять это всё не получилось, поэтому я просто иногда скидывал файлы книг в отдельный каталог на NAS.
+
+Через какое-то время получился сильный рассинхрон — на ноуте книг условно мало, на NAS их уже много. Искать книги «в удаленном каталоге» оказалось сложнее, чем через няшно организованный интерфейс Calibre.
+
+В Calibre есть кнопка «Подключить/Поделиться». Там можно
+* запустить контент-сервер (на ноуте для подключения «[[https://manual.calibre-ebook.com/ru/server.html|снаружи]]»; не нужно),
+* запустить беспроводное соединение устройств (условно тот же сценарий; не нужно),
+* подключиться к папке.
+
+Последнее вроде бы подразумевает, что можно зайти в shared-каталог с книгами на NAS, но напрямую это не работает. Подключиться можно только к локальному каталогу. И это нормальное поведение — все подключенные устройства (книги, телефоны — собственно, флэшки) в системе представлены как «вот ещё один каталог с файлами».
+
+Есть решение: удалённый каталог можно примонтировать в систему под видом обычного каталога. Calibre не будет знать, что «подключаемый локальный каталог» на самом деле представляет собой  удалённый ресурс, он будет видеть всего лишь подключенное «отдельное устройство», с которым можно обмениваться книгами и редактировать их метаданные.
+
+===== Примонтировать постоянный share на каталог в NAS =====
+
+В этом примере:
+* есть каталог с библиотекой Calibre — в нём и каталоги с книгами, и файлы метаданных библиотеки
+	* metadata.db
+	* metadata_pre_restore.db
+	* metadata_db_prefs_backup.json
+* на NAS есть shared-каталог с условным названием “books”, доступен через smb по условному IP: 
+	* ''smb://192.168.50.10/books/''
+* у моего пользователя на NAS (условно “astenix”) есть права записи в shared-каталог “books”
+
+==== Установить утилиты для контроля подключений ====
+
+''sudo apt update && sudo apt upgrade''
+
+Нужны утилиты LinuxCIFS (позволит подключиться к удаленному каталогу и через монтирование локального каталога) и psmisc (контроль над подключениями к удаленным ресурсам через команду “fuser”, которая показывает кто где и куда подключен в системе).
+
+''sudo aptitude install cifs-utils psmisc''
+
+Проверить работоспособность LinuxCIFS:
+
+''mount -t cifs''
+
+В ответ ожидаем тишину без сообщений о каких-либо ошибках.
+
+Проверить доступ к команде “fuser”:
+
+''fuser''
+
+В ответ ожидаем стандартную справку о её использовании. Всё ок.
+
+==== Создать файл nas_credentials ====
+
+Это текстовый файл с логином и паролем моего юзера на NAS для автоматического подхватывания сетевых подключений:
+
+''mcedit ~/.nas_credentials''
+
+Добавить данные для подключения к удаленному каталогу:
+
+''username=user_name''
+''password=user_password''
+
+Иногда (под виндой) в этом файле нужна третья строка “''domain=user_domain''”
+
+Этот файл может натворить проблем, поэтому лучше положить его в каталог root:
+
+''sudo mv .nas_credentials /root''
+
+и сделать его владельцем root:
+
+''sudo chown root:root /root/.nas_credentials''
+
+Установить ограниченные права доступа к этому файлу:
+
+''sudo chmod 600 /root/.nas_credentials''
+
+С такими настройками будет запрещена даже попытка прочитать содержимое этого файла: ''cat /root/.nas_credentials'' вернет сообщение «Отказано в доступе». С другой стороны, ''sudo cat /root/.nas_credentials'' прочитает всё как обычно…
+
+==== Создать каталог в который будет смонитрован удаленный каталог ====
+
+''sudo mkdir /mnt/books''
+
+==== Примонтировать удаленный каталог в /mnt/nas-books ====
+
+=== Просто примонтировать в систему удаленный каталог ===
+
+Это стандартный подход к монтированию удаленных каталогов:
+
+''sudo mount -t cifs -o rw,vers=3.0,credentials=/root/.nas_credentials //192.168.50.10/books/ /mnt/books && mount -t cifs''
+
+Минус в том, что в результате его владельцем будет “root”, и Calibre не сможет сделать дежурные записи в базу метаданных. С другой стороны, условные другие пользователи не смогут что-либо удалить из этого каталога…
+
+Отмонтировать:
+
+''sudo umount -t cifs /mnt/books && mount -t cifs''
+
+=== Примонтировать в систему удаленный каталог с полным доступом для своего юзера ===
+
+Сперва узнать uid и gid своего юзера: 
+
+''id''
+
+Если это основной (единственный) юзер на ноуте, то, как правило, его uid=1000 и gid=1000.
+
+''sudo mount -t cifs -o vers=3.0,credentials=/root/.nas_credentials,uid=1000,gid=1000,dir_mode=0755,file_mode=0755 //192.168.50.10/books/ /mnt/books && mount -t cifs''
+
+Теперь можно запустить Calibre.
+
+==== Теория прав файлов ====
+
+''There are three types of access restrictions:''
+
+''Permission    Action      chmod option''
+''======================================''
+''read          (view)      r or 4''
+''write         (edit)      w or 2''
+''execute       (execute)   x or 1''
+
+''There are also three types of user restrictions:''
+
+''User    ls output''
+''==================''
+''owner   -rwx------''
+''group   ----rwx---''
+''other   -------rwx''
+
+''Folder/Directory Permissions''
+
+''Permission    Action                               chmod option''
+''===============================================================''
+''read          (view contents: i.e., ls command)      r or 4''
+''write         (create or remove files from dir)      w or 2''
+''execute       (cd into directory)                    x or 1''
+
+''Numeric notation''
+
+''Another method for representing Linux permissions is an octal notation as shown by stat -c %a. This notation consists of at least three digits. Each of the three rightmost digits represents a different component of the permissions: owner, group, and others.''
+
+''Each of these digits is the sum of its component bits in the binary numeral system:''
+
+''Symbolic Notation    Octal Notation    English''
+''============================================================''
+''----------            0000               no permissions''
+''---x--x--x            0111               execute''
+''--w--w--w-            0222               write''
+''--wx-wx-wx            0333               write & execute''
+''-r--r--r--            0444               read''
+''-r-xr-xr-x            0555               read & execute''
+''-rw-rw-rw-            0666               read & write''
+''-rwxrwxrwx            0777               read. write & execute''
+
+''Now, what does 755 mean?''
+
+''7=rwx 5=r-x 5=r-x''
+
+''This means that the directory has the default permissions -rwxr-xr-x (represented in octal notation as 0755).''
+
+Перепроверить, что этот каталог принадлежит действующему пользователю и у него есть доступ на запись в этот каталог. Если нет, то позже Calibre не сможет инициализировать там библиотеку:
+
+''ls -ld /home/astenix/nas-books''
+
+Пример ответа о работающем подключении:
+
+''//192.168.50.10/nas-books/ on /home/astenix/nas-books type cifs (rw,relatime,vers=3.0,cache=strict,username=astenix,uid=0,noforceuid,gid=0,noforcegid,addr=192.168.50.10,file_mode=0755,dir_mode=0755,soft,nounix,serverino,mapposix,rsize=4194304,wsize=4194304,bsize=1048576,echo_interval=60,actimeo=1,closetimeo=1)''
+
+Зайти в каталог, в который примонтирован удалённый сетевой ресурс:
+
+''cd /home/astenix/nas-books''
+
+Хоба, а там все книги!
+
+==== Подключить подключенную библиотеку к Calibre ====
+
+Calibre 
+> Библиотека Calibre
+> Переключить/Создать библиотеку
+> указать «Новое местоположение» = ''/home/astenix/nas-books''
+
+Calibre захочет «восстановить базу данных». Конечно да, но сперва надо учесть, что это может занять много времени, и прерывать этот процесс неразумно. Будет перечитано ВСЁ содержимое библиотеки.
+
+Здраво держать несколько тематических библиотек и переключаться между ними при необходимости, нежели держать одну библиотеку бесконечного размера.
+
+===== А ещё хочется иметь эту share в системе постоянно =====
+
+https://linuxize.com/post/how-to-mount-cifs-windows-share-on-linux/
+
+When the share is manually mounted with the mount command, it does not persist after a reboot.
+
+The /etc/fstab file contains a list of entries that define where how and what filesystem will be mounted on system startup.
+
+To automatically mount a Windows share when your Linux system starts up, define the mount in the /etc/fstab file. The line must include the hostname or the IP address of the Windows PC, the share name, and the mount point on the local machine.
+
+Open the /etc/fstab file with your text editor :
+
+sudo nano /etc/fstab
+
+Add the following line to the file:
+/etc/fstab
+
+# <file system>             <dir>          <type> <options>                                                   <dump>  <pass>
+//WIN_SHARE_IP/share_name  /mnt/win_share  cifs  credentials=/etc/win-credentials,file_mode=0755,dir_mode=0755 0       0
+
+Run the following command to mount the share:
+
+sudo mount /mnt/win_share
+
+The mount command, will read the content of the /etc/fstab and mount the share.
+
+Next time you reboot the system, the Windows share will be mounted automatically.
+Unmounting Windows Share
+
+The umount command detaches (unmounts) the mounted file system from the directory tree.
+
+To detach a mounted Windows share, use the umount command followed by either the directory where it has been mounted or remote share:
+
+sudo umount /mnt/win_share
+
+If the CIFS mount has an entry in the fstab file, remove it.
+
+The umount command will fail to detach the share when it is in use. To find out which processes are accessing the windows share, use the fuser command:
+
+fuser -m MOUNT_POINT
+
+Once you find the processes, you can stop them with the kill command and unmount the share.
+
+If you still have problems unmounting the share, use the -l (--lazy) option, which allows you to unmount a busy file system as soon as it is not busy anymore.
+
+sudo umount -l MOUNT_POINT
+
+Conclusion
+
+In Linux, you can mount a Windows shared using the mount command with the cifs option.
+
+
+, поэтому сперва надо отредактировать /etc/fstab — ДО того, как в локальную систему будет примонтирован удаленный каталог.
+
+Аккуратно с этим файлом, там прописаны партиции, с которых загружаются все части рабочей системы. Сперва надо сделать бэкап:
+
+''sudo cp /etc/fstab /etc/fstab.backup''
+
+Начинаем редактирование
+
+''sudo mcedit /etc/fstab''
+
+Его содержимое — условная таблица, в которой значения «в ячейках» представлены в одной строке с разделением через один или несколько пробелов.
+
+ Добавить новую строку такого вида
+
+''//192.168.50.10/nas-books/  /mnt/nas-books  cifs  _netdev,sec=ntlmssp,multiuser 0 0''
+
+Если надо подтянуть данные из файла .credentials: 
+
+''//192.168.50.10/nas-books/	/mnt/nas-books''	cifs  _netdev,sec=ntlmssp,multiuser,credentials=/home/user/.credentials 0 0
+
+	_netdev option will prevent the client system from hanging in forever if the SAMBA server is unreachable
+	sec=ntlmssp option will handle the transmission of credentials between SAMBA server and client
+	multiuser option will allow multiple users to mount the share. These users are managed by the utility smbpasswd
+
+Принудительно перечитать содержимое ''/etc/fstab:''
+
+''systemctl daemon-reload''
+
+Выполнить монтирование удаленного каталога в ''/mnt/nas-books:''
+
+''mount -t cifs //192.168.50.10/nas-books /mnt/nas-books''
+
+mount -t cifs //[server-ip]/[share-path] /[mount-point]
+''mount -t cifs //astenix@192.168.50.10/nas-books''
+
+In the example below, the SMB server’s IP is 192.0.2.17, the share’s path is SharedFiles, and the mount point is /mnt/smb_share.
+
+
+''mount -t cifs //astenix@''
+
+When prompted, enter the password to connect to the remote share.
+
+If the connection is successful, you should see the remote share mounted on the mount point directory you created. To verify this, type the following command:
+
+mount -t cifs
+
+The command above lists all mounted SMB shares. Among this list, you should see the share you just mounted.
+
+You should now be able to access the files as if they were on a local drive. In the command below, replace [mount-point] with the directory you have created (such as /mnt/smb_share).
+
+cd [mount-point]
+
+	From here, you can run the ls command to view your files and you can interact with the files as you would any other files on your system.
+
+
+	https://www.admin-magazine.com/HPC/Articles/Sharing-Data-with-SSHFS
+
+	https://tecadmin.net/mounting-samba-share-on-ubuntu/
+
+	https://unix.stackexchange.com/questions/30268/mount-device-with-r-w-access-to-specific-user
+
+	https://www.dmosk.ru/instruktions.php?object=samba-ubuntu
+
+	
+
+
+===== Unmount a Share =====
+
+You may need to unmount a share at some point. To unmount an SMB share that has been mounted using the mount command, you can use the umount command followed by the mount point of the share. The correct command is umount, not unmount.
+
+So to unmount an SMB share at the mount point <Mount Point>, run the following command:
+
+Сперва надо выйти из этого каталога — проверить/закрыть Dolphin, Konsole, Calibre…
+
+''sudo umount -t cifs /mnt/books && mount -t cifs''
+
+Если это было единственное подключение, то в ответ будет пусто. А каталог ''/mnt/nas-books'' будет пустым.
+
+
+
+
+Conclusion
+
+You now have an understanding of SMB (and CIFS), what an SMB share is, and what a mount point is. These pieces of information allow you to share remote data in a way that’s transparent to users. From the user’s perspective, the resource is local to the server that they’re accessing. This guide also shows you how to use the mount and umount commands in a basic way to create and delete shares, how to create and use a credentials file to automate the sharing process to some extent, and how to automatically remount the share after a reboot.
+More Information
+
+You may wish to consult the following resources for additional information on this topic. While these are provided in the hope that they will be useful, please note that we cannot vouch for the accuracy or timeliness of externally hosted materials.
+
+	Server Message Block (SMB) share
+	Common Internet File System (CIFS) utils

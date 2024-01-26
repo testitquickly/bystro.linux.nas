@@ -18,14 +18,13 @@ Creation-Date: 2023-07-10T19:01:29+03:00
  
 Вот такой командой можно примонтировать папку, требующую авторизации по логину и паролю:
 
-''sudo mount -t cifs //192.168.0.11/share /media/sharefolder -o'' 
-''username=windowsuser,password=windowspass,iocharset=utf8,file_mode=0777,dir_mode=0777''
+''sudo mount -t cifs //192.168.0.11/share /media/sharefolder -o'' ''username=windowsUserLogin,password=userPassword,iocharset=utf8,file_mode=0777,dir_mode=0777''
  
 где вместо //192.168.0.11/share – ip-адрес и имя необходимой общей папки (если имя расшаренной папки содержит пробел, то необходимо заключить весь путь в кавычки, как это показано в следующем примере), /media/sharefolder – путь куда будет монтироваться ресурс, windowsuser – имя пользователя с необходимыми правами доступа к этому ресурсу Windows, windowspass – пароль этого пользователя.
  
 Если необходимая папка не требует обязательной авторизации, то подключить ресурс можно такой командой:
  
-sudo mount -t cifs "//192.168.0.11/общие документы" /media/sharefolder -o guest,rw,iocharset=utf8,file_mode=0777,dir_mode=0777
+''sudo mount -t cifs "//192.168.0.11/общие документы" /media/sharefolder -o guest,rw,iocharset=utf8,file_mode=0777,dir_mode=0777''
 
 Если гостевой доступ к необходимой папке включен только в режиме чтения, то будет достаточно такой команды:
  
@@ -98,7 +97,7 @@ sudo nano /etc/nsswitch.conf
 
 1. Правим /etc/fstab под рутом
 
-192.168.X.X:/dir1/dir2   /mnt/dir1/dir2  nfs  noauto,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=1min 0 0
+''192.168.X.X:/dir1/dir2   /mnt/dir1/dir2  nfs  noauto,x-systemd.automount,x-systemd.device-timeout=10,timeo=14,x-systemd.idle-timeout=1min 0 0''
 
 192.168.X.X:/dir1/dir2 -- откуда монтируем
 /mnt/dir1/dir2 -- куда монтируем (директории должны существовать)
@@ -107,17 +106,19 @@ sudo nano /etc/nsswitch.conf
 
 2. Если с ноутбука по wifi - может возникнуть следующий косяк: При выключении выключении ноутбук сначала выключает wifi, а потом долго и нудно пытается отмонтировать примонтированное. Это может затянутся надолго. Лечится так: идем в /etc/init.d/. Создаем файл например unmount_nfs.sh . Наполняем его следующим содержимым:
 
-#!/bin/bash
-#script for automatic un-mounting of network shares on reboot and shutdown
-umount /mnt/dir1/dir2
-exit
+''#!/bin/bash''
+''#script for automatic un-mounting of network shares on reboot and shutdown''
+''umount /mnt/dir1/dir2''
+''exit''
 
-Не забываем делать этот скрипт исполняемым
- chmod +x unmount_nfs.sh 
+Селать этот скрипт исполняемым
+
+ ''chmod +x unmount_nfs.sh'' 
 
 И прописываем его
  update-rc.d unmount_nfs.sh start 20 0 6 . 
 Напоминаю: все действия под рутом.
 
 Одной строкой
-sudo mount -t cifs //192.168.0.11/share /media/sharefolder -o username=windowsuser,password=windowspass,iocharset=utf8,file_mode=0777,dir_mode=0777
+
+''sudo mount -t cifs //192.168.0.11/share /media/sharefolder -o username=windowsuser,password=windowspass,iocharset=utf8,file_mode=0777,dir_mode=0777''
