@@ -1,0 +1,42 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-05-08T22:36:07+03:00
+
+====== Проверить сетевой интерфейс ======
+
+Этот шаг необязателен.
+
+===== Узнать название всех доступных сетевых контроллеров =====
+
+и проводного, и Wi-Fi
+
+==== Вкратце ====
+
+''nmcli connection show''
+
+На OMV может быть не установлена „nmcli”.
+
+==== Подробно ====
+
+''lspci | egrep -i --color 'Ethernet|wlan|Wireless'''
+
+Пример ответа:
+
+''02:00.0 Network controller: Qualcomm Atheros QCA6174 802.11ac Wireless Network Adapter (rev 32)''
+''03:00.1 Ethernet controller: Realtek Semiconductor Co., Ltd. RTL8111/8168/8411 PCI Express Gigabit Ethernet Controller (rev 12)''
+
+===== Выяснить названия действующих сетевых интерфейсов =====
+
+''ip addr''
+
+Обычное подключение по проводу может называться „enp2s0”:
+
+===== Узнать теоретическую скорость подключения =====
+
+Установить „ethtool” и запросить данные:
+
+''sudo apt-get install ethtool && sudo ethtool enp2s0''
+
+В ответе можно узнать „Speed: 1000Mb/s”. Это условный 1 гигабит/сек = 125 мегабайт/сек. Реальная максимальная скорость будет вдвое меньше, вроде 55 Миб/сек = 6.5 мегабайт/сек.
+
+//Next step//: [[index]]
