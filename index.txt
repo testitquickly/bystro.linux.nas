@@ -67,8 +67,7 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ===== DLNA =====
 
-1. Установить “JellyFin” на Debian
-2. Установить “JellyFin” на NAS
+1. [[DLNA:Про MiniDLNA]]
 
 ===== Docker =====
 
