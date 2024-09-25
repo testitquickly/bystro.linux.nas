@@ -131,6 +131,7 @@ ssh-add -l
 '''
 
 Пример ожидаемого ответа: 
+
 	«''3072 SHA256:YyaZeTckxJHbwiuew98098yeikgjw7f/Sbdw+LJFejbfke user_email (RSA)»''
 
 Если ssh-ключей в системе нет, ответ будет «//The agent has no identities//». Возможно, надо полностью перезагрузить сервер.
