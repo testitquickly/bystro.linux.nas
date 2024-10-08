@@ -73,11 +73,12 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 1. [[Docker:Установка Docker]]
 2. [[Docker:Настройка Docker]]
-3. [[Docker:Импорт контейнеров]]
-4. [[Docker:Импорт контейнеров:Mail server]]
-5. Установить из OMV “Docker”
-6. Установить из OMV “Portainer”
-7. Установить из OMV “Cockpit”
+3. [[Docker:Гоняем Docker]]
+4. [[Docker:Импорт контейнеров]]
+5. [[Docker:Импорт контейнеров:Mail server]]
+6. Установить из OMV “Docker”
+7. Установить из OMV “Portainer”
+8. Установить из OMV “Cockpit”
 
 ==== Про установку Docker в Debian ====
 

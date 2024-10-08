@@ -18,13 +18,13 @@ Creation-Date: 2023-07-10T19:05:48+03:00
 
 ==== Прописать/проверить DNS server ====
 
-	Если IP-адрес NAS в настройках роутера был динамическим, то добавление гугловского днс этот IP-адрес поменяет. Если он уже был прописан, то вряд ли, но всё равно придётся глянуть для уверенности и проверить соеднение по ssh.
+Если IP-адрес NAS в настройках роутера был динамическим, то добавление гугловского днс этот IP-адрес поменяет. Если он уже был прописан, то вряд ли, но всё равно придётся глянуть для уверенности и проверить соеднение по ssh.
 
-	Если к NAS был предопределён доступ извне по IP, то IP-адрес будет изменён наверняка.
+Если к NAS был предопределён доступ извне по IP, то IP-адрес будет изменён наверняка.
 
 ''8.8.8.8'' — это DNS Google. 
 
-	Можно указать другой, если есть под рукой.
+Можно указать другой, если есть под рукой.
 
 '''
 Network 
@@ -36,19 +36,29 @@ Network
 
 ==== Создать нового юзера только для Docker ====
 
-Это НЕ должен быть существующий root или юзер с ролью admin, поэтому надо сделать нового ([[Users:Добавить пользователей]]). Назовём его //mydocker.//
+Это НЕ должен быть существующий root или юзер с ролью admin, поэтому надо сделать нового ([[Users:Добавить пользователей]]). Назовём его //mydoker// — да, нарочно без буквы «c»//.//
 
 	Трижды перепроверить правильность пароля у этого юзера, иначе потом будут траблы на ровно месте.
 
-Добавить нового юзера //mydocker// в группы 
-	* users
-	* docker
-	* sudo
-	* ssh
+Добавить нового юзера //mydoker// в группы 
 
-Проверить, что //mydocker// может зайти на NAS через ssh. Для этого надо будет [[SSH:Сделать личный ssh-ключ]].
+	* docker
+	* openmediavault_admin
+	* openmediavault_config
+	* sambashare
+	* _ssh
+	* sudo
+	* users
+
+Поставить галочку на „Disallow account modification”.
+
+Проверить, что //mydoker// может зайти на NAS через ssh. Для этого надо будет [[SSH:Сделать личный ssh-ключ]].
 
 	Его можно сделать или локально, или непосредственно на NAS.
+
+Затем
+
+''ssh mydoker@192.168.50.60'' (или какой там IP)
 
 ==== Убедиться в наличии ’User home directory’ ====
 
@@ -62,20 +72,40 @@ User Home directory = Enabled
 
 ==== Создать shared-каталоги для Docker ====
 
-Можно положить их на один диск, nevermind:
+Можно положить их на один диск или на разные — nevermind, но надо учесть, что туда будет записываться много информации, поэтому лучше положить их на hdd с большим запасом.
 
-	1. docker/appdata
-	2. docker/downloads
-	3. docker/media
-	4. docker/containers (это каталог для плагина compose)
+Может показаться, что проще положить несколько каталогов в один общий каталог (это ок) и сделать только shared только головной. Но надо сделать отдельные каталоги для разных типов данных и надо каждый этот каталог сделать shared по-отдельности, потому что дальше в настройках надо будет указывать отдельные шары для отдельных операций.
 
-TODO ! Эту заметку сохранить или удалить?
+Поэтому создаем на отдельном диске каталог „docker“ и внутри него каталоги
 
-	This really needs to be on a larger data drive, as these folders can get large. If you are setting up for the first time, you'll also need the absolute path to this folder (click the 4 squares in the upper right, put a check next to absolute path). 
+1. backup
+2. composefiles
+3. containers
+4. data
+5. downloads
+6. media
 
-	Click the copy icon at the end of this path and just save it in a text file for now.
+* containers — это каталог, в котором уже находятся служебные файлы и в который будут сохраняться данные каждого контейнера. 
+* downloads и media — опционально. Если на дисках уже есть каталог, в который будем сохранять файлы, то новый создавать не нужно.
 
-Последовательно сделать их всех shared — [[SMB:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+Посему:
+
+1. Выбрать подходящий диск
+2. Создать в его корне каталог „docker“
+3. Создать внутри него сразу несколько каталогов (downloads и media — опционально):
+
+''mkdir backup composefiles containers data downloads media''
+
+4. Сделать каждый из этих каталогов shared — [[SMB:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+
+Аккуратно к названиям каталогов. В системе не должно быть shared-каталогов с идентичным названием, даже если они «смотрят» в разные места. Разумно назвать докеровские shared-каталоги с приставкой вроде „dkr_backup”:
+
+1. dkr_backup
+2. dkr_composefiles
+3. dkr_containers
+4. dkr_data
+5. dkr_downloads
+6. dkr_media
 
 ==== Установка Docker ====
 
@@ -89,6 +119,7 @@ TODO ! Эту заметку сохранить или удалить?
 ''> Установить''
 
 Использовать: 
+
 ''Access Rights Management'' 
 ''> Shared Folders'' 
 ''> Reset Permissions''
@@ -111,11 +142,21 @@ TODO ! Эту заметку сохранить или удалить?
 
 ''System > Plugins''
 
-=== Установить плагин //openmediavault-compose// ===
+=== Установить плагины для Docker ===
+
+== //openmediavault-compose// ==
 
 ''System'' 
 ''> Plugins'' 
 ''> установить плагин'' //''openmediavault-compose''//
+
+== //openmediavault-k8s// ==
+
+Kubernetes plugin
+
+''System'' 
+''> Plugins'' 
+''> установить плагин'' //''openmediavault-k8s''//
 
 === Проверить установленный Docker ===
 
@@ -127,6 +168,52 @@ TODO ! Эту заметку сохранить или удалить?
 
 Ожидаемый ответ после последней команды: 
 
-''Docker Root Dir: /var/lib/docker''
+''Docker Root Dir: /srv/dev-disk-by-uuid-abc01234…/docker/containers''
+
+Иногда всё устанавливается в ''/var/lib/docker''. Если у нас в принципе один диск, то ок. Если же система на ssd, а всё остальное на hdd (как и полагается в nas), то это всё надо поменять. Там нужно постоянно под 50 Gb свободного места, кагбэ…
+
+=== Перенести Docker Root Dir ===
+
+1. Залогиниться на сервер под админом (можно под root, nevermind) 
+2. остановить docker
+
+''sudo systemctl stop docker''
+
+''sudo systemctl stop docker.socket''
+
+''sudo systemctl stop containerd''
+
+3. перенести каталог „containers” c ''/srv/dev-disk-by-uuid-abc01234…/docker/containers'' на выбранный hdd в каталог docker/containers.
+4. отредактировать файл (создать, если не существует) с настройками:
+
+''mcedit /etc/docker/daemon.json''
+
+В нём должна быть всего лишь строка с указанием на „корневой каталог Docker”. Отредактировать её, указав путь к новому каталогу:
+
+''{''
+  ''"data-root": "''__''/new_dir''__''/docker"''
+''}''
+
+Saved and close.
+
+5. Перезапустить сервис Docker:
+
+''sudo systemctl start docker''
+
+Если всё ок, ответом будет тишина.
+
+6. Проверить настройки:
+
+''sudo docker info | grep Root''
+
+7. Проверить дефолтное состояние докера
+
+''docker ps''
+
+Ожидаемый ответ: таблица с контейнерами
+
+''CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES''
+
+Она пустая, контейнеров нет.
 
 //Next step//: [[Настройка Docker]]

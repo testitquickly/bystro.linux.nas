@@ -35,6 +35,4 @@ Services
 
 Кликнуть по строке с docker-mailserver > Edit
 
-
-
 Если нет ошибок — запустится.

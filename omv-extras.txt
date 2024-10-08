@@ -32,7 +32,8 @@ Creation-Date: 2023-07-10T16:26:36+03:00
 Можно где-то скачать deb-файл и загрузить его в OMV через GUI. 
 
 Но лучше зайти на NAS по ssh > root и выполнить
-''wget -o'' [[https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install|''https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install'']] ''| bash''
+
+''wget -o'' ''https://github.com/OpenMediaVault-Plugin-Developers/packages/raw/master/install'' ''| bash''
 
 В норме файл сразу скачивается и выполняется.  Если нет:
 

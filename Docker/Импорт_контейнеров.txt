@@ -76,4 +76,4 @@ Now at this point, if you want to keep Portainer around as a security blanket un
 
 Any questions, post in one of the 50 threads on this subject and I'm sure someone can help.
 
-//Next step//: 
+//Next step//: [[Гоняем Docker]]
