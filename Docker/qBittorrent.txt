@@ -1,0 +1,117 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-10-08T18:23:39+03:00
+
+====== qBittorrent ======
+
+Установка для опытных — https://hub.docker.com/r/linuxserver/qbittorrent
+
+Мне нужен простейший способ
+
+''Services''
+''> Compose''
+''> Files''
+''> + Add from example''
+''> тыкнуть по полю „Example”''
+
+Выбрать из выпадающего списка „qBittorrent”. Контейнер появится в статусе «Down».
+
+Залогиниться на NAS под ssh с юзером //mydoker.//
+
+''id mydoker''
+
+Посмотреть в ответе циферки для
+* uid
+* gid
+
+==== Отредактировать файл запуска ====
+
+Кликнуть по контейнеру, затем по иконке Edit.
+
+Указать циферки своего пользователя для 
+environment:
+	  - PUID=…
+	  - PGID=…
+
+- TZ=Etc/UTC — поменять на свою таймзону
+- TZ=Europe/Chisinau
+
+WEBUI_PORT=8080 — задать нестандартный, на который вряд ли кто-то заходит
+
+	WEBUI_PORT=8182
+
+volumes:
+	  - CHANGE_TO_COMPOSE_DATA_PATH/qbittorrent/config:/config
+	  - CHANGE_TO_COMPOSE_DATA_PATH/qbittorrent/downloads:/downloads
+
+заменяем на 
+[[/srv/dev-disk…и_так_далее…]]
+
+Например:
+/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/composefiles/qBittorrent:/config
+/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/downloads:/downloads
+
+	В данном случае после двоеточия объявлена переменная для контейнера, содержимое которой указано ПЕРЕД двоеточием.
+	Можно создать несколько таких переменных вроде 
+	'':/downloadsbooks''
+	'':/downloads1''
+	'':/downloads_2''
+	'':/music''
+	'':/books''
+	
+	и из интерфейса загрузчика «перемещать» загружаемые файлы в соответствующие каталоги. Один из них должен быть установлен по-умолчанию. 
+
+	В эпоху utf-8 вроде бы можно их именовать русскими буквами, но на деле нет, допустимы только буквы английского алфавита. В названии каталогов наоборот.
+
+	Также во все эти «разные каталоги» у юзера //mydoker// должен быть доступ — или явный, или через группу, в которую он вхож, //user// или (что предпочтительнее) //sudo//.
+
+	Полный путь к каталогу, в котором находишься, можно вывести на экран командой ''pwd''
+
+ports:
+	  - 8080:8080
+	заменить на ранее выбранный WEBUI_PORT
+ports:
+	  - 8182:8182
+
+Сохранить.
+
+Тыкнуть по контейнеру, нажать кнопку Up. Начнуть скачиваться файлы и сразу проверяться. 
+
+Если всё хорошо — появится кнопка Close и статус контейнера поменяется на Up. 
+
+Открыть http://tower.local:8182/ — логин и пароль. По-умолчанию ''admin/adminadmin''
+
+Если не пускает 
+
+в панели с иконками Tools > Logs
+
+или в консоли то же самое
+
+		зайти в консоли по ssh на NAS — в каталог, в котором хранятся конфиги qBittorrent > там найти файл „qBittorrent.conf”
+		
+		''docker ps''
+		
+		увидеть CONTAINER ID вроде 67qwe…
+		
+		смотрим его логи
+		
+		''docker logs 67ff3111f426''
+
+Ищем такое:
+
+	The WebUI administrator username is: admin
+	The WebUI administrator password was not set. A temporary password is provided for this session: dgdxCp2ZQ
+
+Используем.
+
+Как только зашли — Настройки > Веб-интерфейс > Аутентификация
+Поменять имя пользователя на новое.
+Указать новый пароль. 
+
+Дальше в настройки
+
+Загрузки
+> Путь сохранения по умолчанию: ''/downloads''
+
+Почему так — так это из настроек контейнера в volumes указан путь для '':/downloads'' это переменная, на которую надо ориентироваться
+	/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/files:/downloads 
