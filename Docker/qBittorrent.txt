@@ -48,8 +48,8 @@ volumes:
 [[/srv/dev-disk…и_так_далее…]]
 
 Например:
-/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/composefiles/qBittorrent:/config
-/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/downloads:/downloads
+/srv/dev-disk-by-uuid-3csg4…/docker/composefiles/qBittorrent:/config
+/srv/dev-disk-by-uuid-3csg4…/docker/downloads:/downloads
 
 	В данном случае после двоеточия объявлена переменная для контейнера, содержимое которой указано ПЕРЕД двоеточием.
 	Можно создать несколько таких переменных вроде 
@@ -79,7 +79,7 @@ ports:
 
 Если всё хорошо — появится кнопка Close и статус контейнера поменяется на Up. 
 
-Открыть http://tower.local:8182/ — логин и пароль. По-умолчанию ''admin/adminadmin''
+Открыть [[http://MY_NAS:8182/]] — логин и пароль. По-умолчанию ''admin/adminadmin''
 
 Если не пускает 
 
@@ -114,4 +114,16 @@ ports:
 > Путь сохранения по умолчанию: ''/downloads''
 
 Почему так — так это из настроек контейнера в volumes указан путь для '':/downloads'' это переменная, на которую надо ориентироваться
-	/srv/dev-disk-by-uuid-3csg450-31e3-88qq-ewe4c-455edd9ee987/docker/files:/downloads 
+	/srv/dev-disk-by-uuid-3csg4…/docker/files:/downloads 
+
+===== Внимание =====
+
+Контейнер настроен на автоматический запуск вместе с OMV. Это значит, что торренты начинают закачиваться/раздаваться автоматически. Если за этим не следить, то можно получить неожиданное проседание пропускной способности домашней сети.
+
+Есть смысл или добавить на Dashboard раздел про запущенные контейнеры в
+
+''User Settings (иконка справа вверху)''
+''> Dashboard''
+''> Containers''
+
+или запретить запуск контейнера qBittorrent при старте системы и запускать его вручную при необходимости.

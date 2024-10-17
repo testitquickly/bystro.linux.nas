@@ -216,4 +216,37 @@ Saved and close.
 
 Она пустая, контейнеров нет.
 
+===== Базовая настройка Docker =====
+
+В меню OMV появляется новый пункт — Compose.
+
+''Services''
+''> Compose''
+''> Settings''
+
+Прописать каталоги, которые были созданы на [[#Создать shared-каталоги для Docker|предыдущем этапе]]:
+
+Compose Files
+	* Shared folder = //dkr_composefiles// [docker]
+	* Owner = mydoker 
+	* Group of directories = sudo
+	* Permissions = Everyone - read/write
+
+Data
+	* Shared folder = //dkr_data// [docker]
+
+Backup
+	* Shared folder = //dkr_backup// [docker]
+
+Docker
+	* Docker storage = заменить на полный путь к каталогу ’docker/containers’ вроде „///srv/dev-disk-by-uuid-fbd681fd-e0cc-479d-b62f-5544f10f4317/docker/containers”//
+	* Status = Installed and running
+	* Docker version = оставить как есть
+	* Compose version = оставить как есть
+
+Сохранить настройки
+
+	1. Save > Apply
+	2. [Restart Docker] > Yes (это самое важное)
+
 //Next step//: [[Настройка Docker]]

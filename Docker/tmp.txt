@@ -5,7 +5,7 @@ Creation-Date: 2024-10-08T20:18:37+03:00
 ====== tmp ======
 
 
-===== Установить Portainer (не надо) =====
+===== Установить Portainer =====
 
 Это web-ui для управления Docker. Аналоги: DockerUI, Shipyard.
 
@@ -77,6 +77,6 @@ Cockpit — Cloud Content Management System, API-driven CMS for developers. Mana
 ''> Cockpit'' 
 ''> [+ Install]''
 
-Открыть http://ip:9090/
+Открыть http://__NAS_IP__:9000
 
 Залогиниться под докер-юзером из OMV.

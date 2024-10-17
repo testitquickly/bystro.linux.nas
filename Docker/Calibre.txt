@@ -1,0 +1,20 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-10-10T17:38:59+03:00
+
+====== Calibre ======
+
+environment:
+	  - PUID=1005
+	  - PGID=100
+	  - TZ=Europe/Chisinau
+	  - WEBUI_PORT=8182
+	volumes:
+	  - /srv/dev-disk-by-uuid-2caf2535-01a9-44ee-b74c-455edd9ee987/docker/composefiles/qBittorrent:/config
+	  - /srv/dev-disk-by-uuid-8ad48aba-d0c5-4921-80b2-ab71d4ad77d8/v2/v2.Фильмы:/v2
+	  - /srv/dev-disk-by-uuid-2caf2535-01a9-44ee-b74c-455edd9ee987/v3/v3.Фильмы:/v3
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/backup/Музыка:/music
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/backup/Книги:/books
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/backup/Аудиокниги:/a-books
+	ports:
+	  - 8182:8182

@@ -1,0 +1,65 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-10-11T13:08:45+03:00
+
+====== Heimdall ======
+
+Это Dashboard для приложений, которые крутятся на сервере. Когда контейнеров больше трёх, надо их упорядочить и понимать состояние (on/off).
+
+Оригинал https://github.com/linuxserver/Heimdall
+
+Обзор (40 секунд) https://www.youtube.com/watch?v=GXnnMAxPzMc
+
+===== Установка =====
+
+через Compose
+
+''Services''
+''> Compose''
+''> Files''
+''> [Add from Example]''
+
+искать Heimdall.
+
+===== Отредактировать =====
+
+Аккуратно с отступами — yaml очень требователен к ним.
+
+Каталог к конфигам будет называться Heimdall — с большой буквы.
+
+Heimdall работает через 80-й порт, поэтому порты надо указать так: 8181:80
+
+networks:
+	  - local
+networks:
+	  local:
+	driver: bridge
+ 
+restart: unless-stopped
+
+''services:''
+  ''heimdall:''
+	''image: linuxserver/heimdall''
+	''container_name: heimdall''
+	''networks:''
+	  ''- local''
+	''environment:''
+	  ''- PUID=1005''
+	  ''- PGID=100''
+	  ''- TZ=Europe/Chisinau''
+	''volumes:''
+	  ''- /srv/dev-disk-by-uuid-2caf…/docker/composefiles/Heimdall:/config''
+	''ports:''
+	  ''- 8183:80''
+	  ''- 444:443''
+	  ''#- 99:80 #optional''
+	''restart: unless-stopped''
+''networks:''
+  ''local:''
+	''driver: bridge''
+
+
+
+
+
+
