@@ -2,7 +2,7 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2024-09-02T03:46:52+03:00
 
-====== Про MiniDLNA ======
+====== MiniDLNA ======
 
 В OMV есть плагин «MiniDLNA», но он проблемный:
 

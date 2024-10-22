@@ -8,6 +8,8 @@ Creation-Date: 2023-07-10T19:05:48+03:00
 
 	Пример: https://habr.com/ru/post/188362/ Как всё настроить по-быстрому" — это отдельная тема. Основы и установка просты, но с конфигами придётся повозиться.
 
+https://wiki.omv-extras.org/doku.php?id=omv7:docker_in_omv#install_and_configure_docker
+
 ===== Установить Docker =====
 
 ==== Обновить OMV по-максимуму ====

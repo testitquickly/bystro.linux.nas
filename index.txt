@@ -67,7 +67,7 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ===== DLNA =====
 
-1. [[DLNA:Про MiniDLNA]]
+1. [[DLNA:MiniDLNA]]
 
 ===== Docker =====
 

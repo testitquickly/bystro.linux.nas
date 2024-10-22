@@ -4,6 +4,72 @@ Creation-Date: 2023-07-10T19:05:59+03:00
 
 ====== Настройка Docker ======
 
+==== Список запущенных (работающих) контейнеров ====
+
+''docker ps''
+
+==== Список всех контейнеров в системе (в любом состоянии) ====
+
+''docker ps -a''
+
+==== Посмотреть логи контейнера ’myexample’ ====
+
+''docker logs myexample''
+
+==== Запустить контейнер вручную ====
+
+''docker start myexample''
+
+Если контейнер находится в состоянии Exited, вы можете получить причину выхода с помощью команды:
+
+''docker inspect --format='{{.State.ExitCode}}' pigallery2''
+
+''docker inspect pigallery2 | grep -i error''
+
+Если код выхода не равен 0, это значит, что произошла ошибка. 
+
+''docker run -it --rm \''
+''-v /srv/dev-disk-by-uuid-2caf2535-01a9-44ee-b74c-455edd9ee987/docker/composefiles/FotoGalleryia:/FotoGalleryia/config \''
+''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/db-data:/FotoGalleryia/db \''
+''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/images:/FotoGalleryia/images \''
+''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/tmp:/FotoGalleryia/tmp \''
+''bpatrik/pigallery2''
+
+''docker run \''
+   ''-p 8186:80 \''
+   ''-e NODE_ENV=debug \''
+   ''-v /srv/dev-disk-by-uuid-2caf2535-01a9-44ee-b74c-455edd9ee987/docker/composefiles/FotoGalleryia:/FotoGalleryia/config \''
+   ''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/db-data:/FotoGalleryia/db \''
+   ''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/images:/FotoGalleryia/images \''
+   ''-v /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/tmp:/FotoGalleryia/tmp \''
+   ''bpatrik/pigallery2:latest''
+ 
+	   
+ КОНФИГ
+
+'''
+services:
+  pigallery2:
+	image: bpatrik/pigallery2:latest
+	container_name: pigallery2
+	environment:
+	  - PUID=1005
+	  - PGID=100
+	  - TZ=Europe/Chisinau
+	  - NODE_ENV=debug #production # set to 'debug' for full debug logging
+	volumes:
+	  - /srv/dev-disk-by-uuid-2caf2535-01a9-44ee-b74c-455edd9ee987/docker/composefiles/FotoGalleryia:/FotoGalleryia/config
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/db-data:/FotoGalleryia/db
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/images:/FotoGalleryia/images
+	  - /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/FotoGalleryia/tmp:/FotoGalleryia/tmp
+	ports:
+	  - 8186:80
+	restart: no
+'''
+
+ 
+
+
 ===== Добавить ssh в Docker =====
 
 After running through the commands above let’s test out how to use ssh when connecting to a docker container. For this example we will begin by creating the following docker compose file.
