@@ -4,11 +4,11 @@ Creation-Date: 2023-02-03T02:00:34+02:00
 
 ====== Сделать “User home directory” ======
 
-Нужно сделать на сервере отдельный каталог для хранения пользовательских данных при логине по ssh. Такой каталог можно условно назвать “''user_settings''”.
+Нужно сделать на сервере отдельный каталог для хранения пользовательских данных. Тот же Midnight Commander (как и прочие программы)  должен куда-то записывать свои конфиги.
 
-Он нужен для сохранения настроек юзер-профилей и чтобы можно было логиниться на сервер по ssh и запускать от имени юзера тот же Midnight Commander — программам нужно записывать свои конфиги в какие-то каталоги.
+Каталог можно условно назвать “''users''”. 
 
-Три раза внимательно с диском с каталогом “user_settings”. Если он исчезнет из OMV (поломался, вынули по ошибке или заменили), при логине по ssh потеряется возможность запускать ПО от имени залогиненного юзера, пойдут ошибки “Could not chdir to home directory”. Придётся 
+Три раза внимательно с диском с каталогом “users”. Если он исчезнет из OMV (поломался, вынули по ошибке или заменили), при логине по ssh потеряется возможность запускать ПО от имени залогиненного юзера, пойдут ошибки “Could not chdir to home directory”. Придётся 
 
 	1. создать нового пользователя, аналогичного основному
 	2. залогиниться под новым
@@ -27,41 +27,42 @@ Creation-Date: 2023-02-03T02:00:34+02:00
 
 На всякий случай убедиться в том, что на nas сейчас больше никто не залогинен по ssh.
 
-Зайти на NAS по ssh под юзером ''nimda'' (''admin'' наоборот). 
+Зайти на NAS по ssh под ''root'':
 
 ''su''
 
-''mkdir /home/user_settings/''
+''mkdir /home/users/''
 
 '''
-chown astenix:sudo -R /home/user_settings/
+chown astenix:sudo -R /home/users/
 '''
+
+Повторить последнюю команду для всех юзеров на сервере.
 
 ===== Сделать симлинк на каталог с профилями =====
 
 Перейти на HDD, на котором будет создана share для каталога с файлами пользовательских профилей. Например — /dev/sdd1
 
-''ln -s /home/user_settings/''
+''ln -s /home/users/''
 
 ===== Сделать shared folder в OMV для всех пользователей =====
 
-В браузере в OMV залогиниться под юзером ''nimda''.
+В браузере в OMV залогиниться под админом.
 
-Storage 
+''Storage'' 
 ''> Shared Folders''
 
 Создать новый Shared Folder на /dev/sdd1
 
-* Name: user_settings
-* File system: /dev/sdd1
-* Relative path > Browse directory > выбрать каталог user_settings/ (на самом деле он симлинк)
+* Name: ''users''
+* File system: ''/dev/sdd1''
+* Relative path 
+	* > Browse directory 
+	* > выбрать каталог ''users/'' (на самом деле это симлинк)
+* Permissions = Administrator: read/write, Users: read/write, Others: no access
 * [Save]
 
-Создать новый shared-каталог “all_user_settings” на каком-нибудь из доступных hdd:
-* Permissions = Administrator: read/write, Users: read/write, Others: no access
-* [Save / Apply / Yes]
-
-Зайти в Privileges для этого каталога и поставить галочками права Read/Write для юзеров и групп.
+Зайти в //Permissions// для этого каталога и поставить галочками права Read/Write для юзеров и групп.
 
 Зайти в ACL (Access Control List — список управления доступом) для этого каталога и поставить галочками Read/Write для юзеров:
 * Group = users > Read/Write/Execute
@@ -70,22 +71,22 @@ Storage
 
 ===== Назначить его как «User home directory» =====
 
-Users 
+''Users'' 
 ''> Settings'' 
 ''> User home directory''
 ''> Enabled'' 
-''> Location = выбрать появившийся Shared Folder «user_settings»''
+''> Location = выбрать появившийся Shared Folder «users»''
 ''[Save]''
 
 ==== Изменить настройки основного пользователя ====
 
 под которым будем заходить на NAS
 
-Users 
+''Users'' 
 ''> Users''
 ''> тыкнуть по существующему юзеру (например «astenix»)''
 ''> [Shared folder permissions]'' 
-''> в списке доступных каталогов должен появиться «user_settings»'' 
+''> в списке доступных каталогов должен появиться «/users»'' 
 ''> тыкнуть по нему и по кнопке [Read/Write]'' 
 ''> [Save]''
 

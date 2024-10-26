@@ -39,4 +39,30 @@ Creation-Date: 2023-01-31T14:41:11+02:00
 * незачем шифровать hdd, если на нём нет ничего нелегального;
 * не факт, что самосборный NAS будет дешевле готового «ящика» от, например, Synology.
 
+===== OMV как отдельный сервис в системе Debian =====
+
+Это можно. Служебно напомню, что OMV — это отдельный дистрибутив на базе Debian, который предназначен для полного управления доверенного ему компьютеру в качестве NAS. Возможно, разумно поднять его в докер-контейнере.
+
+Опционально
+
+''sudo apt install wget curl'' 
+
+==== Добавить репозиторий OpenMediaVault ====
+
+''echo "deb https://packages.openmediavault.org/public stoneburner main" | sudo tee /etc/apt/sources.list.d/openmediavault.list''
+
+==== Импорт ключей репозитория ====
+
+''wget -O - https://packages.openmediavault.org/public/archive.key | sudo apt-key add -''
+
+==== Установить OpenMediaVault ====
+
+''sudo apt update && sudo apt upgrade && sudo apt install openmediavault''
+
+==== Настроить OMV через веб-интерфейс ====
+
+ ''http://<IP_адрес_вашего_сервера>''
+
+и дальше настраивать — [[Установка OMV:Настроить OMV через веб-интерфейс]]
+
 //Next step//: [[Установка OMV:Про установку OMV]]
