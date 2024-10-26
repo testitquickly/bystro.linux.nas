@@ -10,6 +10,7 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 ''> Users'' 
 ''> Users'' 
 ''> [+ Create]''
+
 2. Edit user > «General»:
 	* Name = ''nimda'' (это ''admin'' наоборот).
 	* Comment = //Kore Nani Nekooooooo!//
@@ -49,6 +50,7 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 ''> User'' 
 ''> Users'' 
 ''> [+ Add]''
+
 2. Edit user > «General»
 	* Name = логин, придуманный заранее
 	* Comment = //Kore Nani Nekooooooo!//

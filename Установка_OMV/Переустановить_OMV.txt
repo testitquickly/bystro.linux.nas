@@ -1,0 +1,142 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-10-26T14:27:49+03:00
+
+====== Переустановить OMV ======
+
+Например, надо поменять системный диск.
+
+Это можно сделать с помощью внешней утилиты omv-regen.
+
+===== Установить omv-regen =====
+
+Подключиться к NAS по ssh.
+
+Выполнить:
+
+''sudo wget -O - https://raw.githubusercontent.com/xhente/omv-regen/master/omv-regen.sh | sudo bash''
+
+Запустить:
+
+''sudo /usr/sbin/omv-regen''
+
+Там dos-gui, в принципе просто и понятно.
+
+===== Настроить =====
+
+Выбрать ''Backup_Settings''
+
+Указать каталог, в который надо сделать бэкап системы. Его заранее надо создать, а полный путь к нему можно вывести на экран командой ''pwd''
+
+В интерфейсе ''omv-regen'' может показаться, что каталог можно выбрать, но там неоднозначная реализация перехода по каталогам, поэтому надо вставить полный путь в текстовое поле.
+
+Продолжаем — сохранять бэкап семь дней и обновлять систему перед бэкапом. 
+
+На шаге „Additional folder path to include in the backup” просто нажать „Continue”.
+
+Следующий шаг:
+
+===== Сделать бэкапы =====
+
+Смотрим в окне подтверждения настроек все опции и нажимаем „Modify”, если что-то не так, или „Run” если все ок.
+
+Всё работает быстро. В итоге в указанном каталоге появится новый файл типа *.tar.gz
+
+Что ещё надо сохранить:
+
+1. конфигурационный файл базы данных OMV
+
+''/etc/openmediavault/config.xml''
+
+Скопировать его куда-то (можно к себе на ноут).
+
+2. **список юзеров** (без паролей). 
+
+Получить этот список можно так
+
+''cat /etc/passwd | grep /bin/sh''
+
+Пример ответа:
+
+''mydoker:x:1005:100::/srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/user_settings/mydoker:/bin/sh''
+
+У меня только один юзер кроме админа. А юзер-админ там не отображается.
+
+Позже надо будет создать нового юзера ''mydoker'' с тем же именем и, что важно, с тем же UID (1005). 
+
+3. **список установленных плагинов**
+
+Получить этот список можно так
+
+''dpkg -l | grep openmediavault''
+
+Пример ответа:
+
+'''
+ii  openmediavault                       7.4.10-1                             all          openmediavault - The open network attached storage solution
+ii  openmediavault-backup                7.1.4                                all          backup plugin for OpenMediaVault.
+ii  openmediavault-compose               7.2.14                               all          OpenMediaVault compose plugin
+ii  openmediavault-cputemp               7.0.2                                all          cpu temperature plugin for openmediavault
+ii  openmediavault-keyring               1.0.2-2                              all          GnuPG archive keys of the openmediavault archive
+ii  openmediavault-nut                   7.0.5-1                              all          openmediavault Network UPS Tools (NUT) plugin
+ii  openmediavault-omvextrasorg          7.0                                  all          OMV-Extras.org Package Repositories for OpenMediaVault
+ii  openmediavault-resetperms            7.1                                  all          Reset Permissions
+ii  openmediavault-sharerootfs           7.0-1                                all          openmediavault share root filesystem plugin
+ii  openmediavault-wol                   7.0.2                                all          OpenMediaVault WOL plugin
+'''
+
+===== Переустановить систему =====
+
+Выпихнуть из доков все диски, на которых есть информация.
+
+Полностью выдернуть старый системный диск, подключить новый.
+
+Выполнить установку системы с нуля, как полагается, с внешнего носителя. Образ ISO — https://docs.openmediavault.org/en/latest/installation/index.html
+
+После установки выполнить [[Базовая настройка сервера]] по общему шаблону.
+
+Полностью обновить всё, что можно обновить.
+
+[[Настроить доступ к NAS по hostname]]
+
+[[Настроить OMV через веб-интерфейс]]
+
+==== Подключить диски ====
+
+==== Установить прежние плагины ====
+
+Просто установить, настраивать их не нужно.
+
+==== Заново создать прежних пользователей ====
+
+Если на сервере много пользователей с разными правами и под них настроены докер-контейнеры, то может быть важно сохранить последовательность UID пользователей на сервере (1000, 1001 и тд…). Для этого надо создавать их последовательно по списку, который был ранее получен. 
+
+Пароли восстанавливать необязательно.
+
+==== Восстановить базу данных OMV ====
+
+Из-под админа положить сохранённый ''config.xml'' в ''/etc/openmediavault/config.xml''
+
+Выполнить
+
+''omv-salt stage run prepare''
+
+''omv-salt stage run deploy''
+
+Указать серверу прежний IP.
+
+Понадобится рестарт.
+
+===== Заново установить omv-regen =====
+
+Подключиться к NAS по ssh.
+
+Выполнить:
+
+''sudo wget -O - https://raw.githubusercontent.com/xhente/omv-regen/master/omv-regen.sh | sudo bash''
+
+Запустить:
+
+''sudo /usr/sbin/omv-regen''
+
+Выбрать 

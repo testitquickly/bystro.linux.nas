@@ -4,7 +4,7 @@ Creation-Date: 2023-01-31T14:45:06+02:00
 
 ====== Установить OMV ======
 
-Установка стандартно доступна с CD или с флэшки через тот же “unetbootin.github.io” — как обычный Debian.
+Установка стандартно доступна с CD или с флэшки через тот же “unetbootin.github.io” — как обычный Debian — https://docs.openmediavault.org/en/latest/installation/index.html
 
 При установке надо указать стандартный набор информации:
 * язык,
