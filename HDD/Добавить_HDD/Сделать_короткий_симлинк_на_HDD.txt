@@ -6,44 +6,27 @@ Creation-Date: 2024-01-10T10:23:32+02:00
 
 ===== Задать симлинк =====
 
-''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media /srv/media''
+На каталог ''/srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media''
 
-Or you could do it this way:
+Можно сделать один симлинк-файл:
 
-''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c /srv/disk1''
+''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media media''
 
-Then you can use
+А можно сделать условный каталог (со множеством уровней вложенности):
 
-'''
-/srv/disk1/media
-/srv/disk1/appdata
-'''
+''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media /nas/drive/media''
 
-===== Remove a Symlink: =====
+===== Проверить симлинк =====
 
-''rm'' /path/to/folder
+В каталоге с симлинком выполнить 
 
+''ls -l''
 
+Пример ответа:
 
-root@openmediavault:~# cd /
-root@openmediavault:/# sudo mkdir NAS
-root@openmediavault:/# 
-root@openmediavault:/# sudo chown -R ken:users /NAS
-root@openmediavault:/# ls -l | grep NAS
-drwxr-xr-x   2 ken  users  4096 Aug 29 11:52 NAS
-root@openmediavault:/# 
-
-Once the user has read/write permission on the directory.. the symlinks are a breeze. I only have two directories symlinked.. 1 is AppData (where all my /config folders are for docker)... and the other is /Media. I basically symlinked all my Media folders (movies, tv shows, books, music, etc.).. most of which I use for docker... under the media folder... Just pay attention when creating directories, etc... as if you're not careful you'll create them on your OS disk, and that could cause you a problem, especially if you have a small OS drive... easy way to check your symlinks are working properly, is to cd into the directory and ls -l, and it should look something like this (you can see the path it's symlinked to after the ->
-
-
-Code
-
-root@openmediavault:/NAS/Media# cd /NAS
-root@openmediavault:/NAS# ls -l
-total 0
-lrwxrwxrwx 1 root root 33 Apr 30 07:50 AppData -> /srv/dev-disk-by-label-D1/AppData
-root@openmediavault:/NAS# 
-
-Learn symlinks.. it will make your life way easier.
+''lrwxrwxrwx 1 astenix users 59 окт 26 18:45 main -> /srv/dev-disk-by-uuid-a165a938-ffb4-4886-be67-4bd8786c8164/''
+''lrwxrwxrwx 1 astenix users 74 окт 26 18:41 v1 -> /srv/dev-disk-by-uuid-3b52c281-2eb5-4209-a629-4d4f9334b017/v1''
+''lrwxrwxrwx 1 astenix users 59 окт 26 18:46 v2 -> /srv/dev-disk-by-uuid-8ad48aba-d0c5-4921-80b2-ab71d4ad77d8/''
+''lrwxrwxrwx 1 astenix users 61 окт 26 18:44 v3 -> /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/v3''
 
 //Продолжить//: [[Добавить HDD]]
