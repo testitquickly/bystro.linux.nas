@@ -12,23 +12,7 @@ Creation-Date: 2023-01-31T14:45:39+02:00
 
 ===== Configure network interface =====
 
-При установке это срабатывает автоматически, но если при установке OMV всё-таки был пропущен этап настройки сети, то вот. 
-
-Придётся 
-
-1. редактировать sources.list (через основной редактор nano):
-
-''sudo nano /etc/apt/sources.list''
-
-Пример правильного содержимого файла для релиза „buster”:
-
-''deb'' [[http://deb.debian.org/debian|''http://deb.debian.org/debian'']] ''buster main contrib non-free''
-''deb'' [[http://deb.debian.org/debian|''http://deb.debian.org/debian'']] ''buster-updates main contrib non-free''
-''deb'' [[http://security.debian.org/debian-security/|''http://security.debian.org/debian-security/'']] ''buster/updates main contrib non-free''
-
-2. Ctrl+O
-3. Enter
-4. Ctrl+X
+В норме подхватываются автоматически.
 
 ===== Configure web control panel =====
 
@@ -40,10 +24,10 @@ Creation-Date: 2023-01-31T14:45:39+02:00
 	
 	Заходить на OMV извне прямо по IP вроде //123.45.678.90:81//, но об этом ещё рано говорить, сперва надо настроить безопасность.
 
-===== Change control panel administrator password =====
+===== Пользователи =====
 
-По-умолчанию это „''admin/openmediavault''”.
+Здесь же из-под root можно добавить на сервер новых пользователей, после чего их «домашние страницы» сразу появятся на системном диске в разделе ''/home'', после чего будет проще [[Users:Сделать “User home directory”]]
 
-Поменять на что-то очень, очень хардкорное.
+Но в принципе пользователей можно будет добавить позже в любое время.
 
 //Next step//: [[Проверить доступ к OMV из браузера]]

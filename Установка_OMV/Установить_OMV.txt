@@ -9,9 +9,108 @@ Creation-Date: 2023-01-31T14:45:06+02:00
 При установке надо указать стандартный набор информации:
 * язык,
 * часовой пояс,
-* имя сервера (определиться заранее),
+* имя сервера (''tower''),
+* домен (''local'')
 * пароль root — максимально хардкорный, а не год битвы между крестьянами округа Штединг с крестоносцами при деревне Альтенеш (1234),
-* connect to network и репозиторий Debian,
+* connect to network и к предпочитаемому репозиторию Debian,
 * ssd для установки системы.
+
+В некоторых случаях может быть нужна не установить OMV, а [[Переустановить OMV]]
+
+===== Установка =====
+
+Стандартная.
+
+В системе будет только юзер ''root''.
+
+Во время установки указать Hostname (например, „tower”) и Domain name (например „local”). Это можно настроить и позже, но сейчас самое время.
+
+===== Поставить софт для консоли =====
+
+Если нет сети, то основные штуки можно поставить с установочного диска:
+
+''apt-get install mc''
+
+===== Включить TRIM для SSD =====
+
+''mcedit /etc/fstab'' 
+
+	Если mc нет, можно через редактор nano:
+	
+	''nano /etc/fstab'' 
+
+Пример ответа — две партиции, система и swap:
+
+'''
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# [file system> [mount point>   [type>  [options>       [dump>  [pass]
+# / was on /dev/sda5 during installation
+UUID=5cdc213b-a7c0-41c4-a66c-69f265db52a5 /               ext4    errors=remount-ro 0       1
+# swap was on /dev/sdb5 during installation
+UUID=2ccc49fb-e364-4532-ab47-d3c9923f2cd1 none            swap    sw              0       0
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+'''
+
+Распознать глазами системную партицию и добавить параметры ''discard'' и ''noatime'':
+
+'''
+UUID=5cdc213b-a7c0-41c4-a66c-69f265db52a5 /               ext4    discard,noatime,errors=remount-ro 0       1
+'''
+
+В nano сохранять изменения надо так:
+1. Ctrl+O
+2. Enter
+3. Ctrl+X
+4. Enter
+
+===== Отредактировать grub2 =====
+
+Там дефолтные настройки, которые приказывают системе при старте подождать пять секунд (если есть несколько операционных систем, то юзер может неспешно выбирать, какую систему загрузить). Уберём это всё.
+
+Сделать копию основного файла:
+
+''cp /etc/default/grub /etc/default/grub.default''
+
+Отредактировать файл:
+
+''mcedit /etc/default/grub''
+
+Посмотреть, какие настройки  там прописаны. 
+
+В принципе достаточно этих четырех пунктов
+
+'''
+	# No boot menu will appear, directly loading first line (Debian)
+GRUB_TIMEOUT=0
+
+	# But you have one second to press SHIFT for open boot menu
+GRUB_HIDDEN_TIMEOUT=1
+
+	# disable graphical terminal (grub-pc only)
+GRUB_TERMINAL=console
+
+	# Extra kernel options here
+GRUB_CMDLINE_LINUX="quiet splash"
+'''
+
+
+Но лучше сперва всё прочитать и или убрать (закомментировать), или учесть и принять по каждому взвешенное решение.
+
+Сохранить изменения
+
+'''
+sudo update-grub
+'''
+
+===== Проверить sources.list =====
+
+''mcedit /etc/apt/sources.list''
+
+Его содержимое меняется со временем, и в принципе если при установке произошло автоматическое подключение к удаленному репозиторию, то там всё будет норм. Если надо — отредактировать содержимое ''sources.list''  «под себя».
 
 //Next step//: [[Обновить OMV]]

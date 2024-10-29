@@ -2,13 +2,203 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2023-01-31T23:37:55+02:00
 
-====== Настроить бэкапы ======
+====== Настроить бэкапы OMV ======
 
-Поначалу это всё не нужно, но в будущем неизбежно что-то случится.
+В целом всегда лучше установить и настроить всё с нуля, нежели восстанавливать систему из бэкапа — неизбежны непредсказуемые сложности, всё будет ок только когда настройки системы почти полностью дефолтные, и диски никто не вынимал/переставлял… Но иногда, например, надо всего лишь поменять системный диск, при этом очень важно не переставлять или заменить HDD в NAS — начнутся проблемы на ровном месте.
 
-Можно использовать внешнюю утилиту 
+Кому-то может быть интересно рассмотреть внешнюю утилиту ''omv-regen'' (см. [[Переустановить OMV]]), она сохраняет системные файлы в единый архив. Но это инструмент для плановой переустановки системы, а не для восстановления после обрушения.
 
-Нужен плагин openmediavault-backup
+Здесь и далее рассматривается восстановление системы с помощью встроенного плагина ''openmediavault-backup''. 
+
+Штатный плагин backup периодически делает дамп системных файлов в отдельный каталог, и если что-то бахнет, то при новой установке системы в ''omv-firstaid'' есть опция «Восстановление из бэкапа».
+
+===== Учесть =====
+
+Не хранить такие бэкапы в RAID, будут неэпические сложности с восстановлением системы.
+
+Если есть возможность скопировать сохранённое на внешний ресурс — сделать это обязательно. Следует это всё и автоматизировать, например, через ''rclone''.
+
+Проверить, если система живет на разделе UEFI. Проверка: ''ls /sys/firmware/efi'' Если этот каталог существует, значит, система на UEFI, а значит, надо добавить в бэкап/восстановление и эту отдельную партицию.
+
+Разумно держить наготове USB drive с SystemRescue live image.
+
+===== Сделать каталог для бэкапов =====
+
+Его лучше сделать в корне какого-то HDD (чтобы был виден и легко доступен) и назвать понятно, например “''omv-system-backup''”.
+
+Сделать его shared — [[SMB:Добавить shared-каталог]]
+
+===== Установить плагин =====
+
+''System''
+''> Plugins''
+
+найти “''openmediavault-backup''” и установить.
+
+В разделе “''System''” появится новый пункт “''Backup''”.
+
+===== Настроить плагин =====
+
+''System''
+''> Backup''
+''> Settings''
+
+* Указать shared folder
+* Выбрать метод архивации — “''fsarchiver''“
+* Keep — ''31''
+* Пароль — на своё усмотрение, обычно не нужен
+* [Save]
+
+''System''
+''> Backup''
+''> Schedule''
+
+* Enabled = ''Yes''
+* Time of execution = ''Monthly''
+* [Save]
+
+Сохранять архив раз в месяц — это расслабон, конечно, но NAS в принципе работают беспроблемно годами, поэтому решение зависит от нагрузки на сервер и состояния его железа.
+
+Рекомендуется после настройки плагина один раз выполнить архивацию один раз с методом архивации “''dd''“. Он специфичен — диск медленно и ритмично потрескивает но надёжен.
+
+===== Файлы в архиве =====
+
+1. backup-omv-xxx.blkid - This is the output of blkidput in a file for informational purposes.
+2. backup-omv-xxx.espdd.gz - This is the UEFI (also called ESP) partition, in a compressed archive.
+3. backup-omv-xxx.fdisk - This is the output of fdisk -l put in a file for informational purposes.
+4. backup-omv-xxx.fsa - This is the fsarchiver file containing the OMV system backup.
+5. backup-omv-xxx.grub - This is the first 446 bytes of the disk where grub is installed
+6. backup-omv-xxx.grubparts - This is the first 512 bytes of the disk where grub is installed and the partition table.
+7. backup-omv-xxx.packages - This is the output ofdpkg -l | grep openmediavault put in a file for informational purposes.
+
+«Make sure you know and test how to restore the backup» ©
+
+===== Как восстановить систему =====
+
+Определить причину сбоя. Восстановить что-то можно только если всего лишь умер системный sata-SSD — его надо заменить. Если что-то оторвалось-перетерлось-сгорело — заменить, если заискрил сам компьютер — вряд ли нужно восстановление из бэкапа, потому что будет новое окружение и, вероятно, новые диски.
+
+https://forum.openmediavault.org/index.php?thread/43774-how-to-restore-omv-system-backup-made-with-openmediavault-backup-plugin/
+
+Open a terminal and type lsblk. Write down the name of the new system drive and the partition where the backup is located. If your backup is on an external drive, connect the drive and type the command again.
+
+Create a new folder where to mount the backups. Run mkdir /mnt/backup, or wathever you like under /mnt.
+
+Mount the partition that contains the backup in the folder you just created. It should be something like /sdXN, where X is a letter (related to the drive) and N is a number (related to the partition).
+
+Bash: Example (partition is omitted to avoid blind execution)
+
+''mount /dev/sdN1 /mnt/backup''
+
+
+Ensure the mount is successful. Run ls /mnt/backup, you should see familiar names. If not, run umount /mnt/backup and repeat the process with another disk.
+
+Locate the backup folder. Example: /mnt/backup/omvbackup/
+
+RESTORE THE PARTITION TABLE
+
+Let's kick off by restoring the grubparts file. This is the first 512 bytes of the disk where grub is installed and the partition table.
+
+Note that:
+
+- sdX is the new system drive - don't add the partition number. In my case is sda
+
+- In this example backups are located in /mnt/backup/omvbackup/ - use the tab to autocomplete in the backup folder. xxx is the timestamp of the backup. Select the grubparts file
+
+
+Bash: Example (partition is omitted to avoid blind execution)
+
+''dd if=/mnt/backup/omvbackup/backup-xxx.grubparts of=/dev/sdN bs=512''
+
+If restore was successful, refresh Gparted and will show your partitions. Ignore the "Used" column, it doesn't reflect the current state (they're all empty).
+
+Identify the boot and system partitions, you'll need these for the next steps. Write down their full name.
+
+
+RESTORE UEFI PARTITION
+
+If your system does not have UEFI, skip this section.
+
+Decompress the UEFI partition, which is contained in the espdd file:
+
+Bash: OMV7
+
+zstd -d /mnt/backup/omvbackup/backup-xxx.espdd.zst
+
+The partition will be extracted to a file ending with .espdd, which should be around 512 MB.
+
+Check with GParted which is the boot partition, usually the first (number 1). Has a boot flag.
+
+Note that:
+
+- sdN1 is usually your boot partition – when running the command, enter the partition number after the letter.
+
+- Select the .espdd file in the backup folder
+
+
+Bash: Example (partition is omitted to avoid blind execution)
+
+dd if=/mnt/backup/omvbackup/backup-xxx.espdd of=/dev/sdN1 bs=512
+
+RESTORE SYSTEM PARTITION
+
+Check with GParted which is the system partition, usually the largest.
+
+- sdX2 is usually your system partition - when running the command, enter the partition number after the letter.
+
+- If you're using OMV7, you need to uncompress first the .zst archive to get the .fsa file. If you're using OMV6 simply skip this since you will already have the .fsa file.
+Bash: OMV7
+
+zstd -d /mnt/backup/omvbackup/backup-xxx.dd.zst
+
+
+- Then select the .fsa file in the backup folder to be used for the restore.
+Bash: Example (partition is omitted to avoid blind execution)
+
+ fsarchiver restfs /mnt/path/to/backup.fsa id=0,dest=/dev/sdX2 -v 
+
+
+NOTE: This step can take up to 30 minutes when restoring to a USB thumb drive, but the command will show the completion percentage.
+
+
+When completed, type reboot and the system will reboot. Remove the SystemRescue media.
+
+
+
+If you’re done these steps correctly, you have restored your OMV system which will boot just as before.
+
+
+SWAP
+
+If you use a swap partition and have changed the drive, OMV/Debian might take a long time to boot and eventually complain about that SWAP partition cannot be found, because it is referenced via the UUID.
+
+
+To fix this, you need to find the new UUID.
+
+Execute ls -l /dev/disk/by-uuid/, find the swap partition and copy the UUID.
+
+You can also execute lsblk  to doublecheck you picked the right partition by checking the size of the swap partition.
+
+
+Then update the UUID.
+
+- Execute sudo nano /etc/fstab
+
+- Update the swap UUID with the new value, save and exit nano
+
+- Execute sudo update-grub to update grub with the new info from fstab
+
+- Execute sudo swapon -s to finally enable the swap partition again
+
+
+STILL NO BOOT?
+
+If you still cannot boot, it is likely that Grub was not restored successfully. It can happen on some systems with specific or weird configurations, or simply because you're out of luck.
+
+To resolve this problem, reboot to SystemRescue media, and reinstall grub using the utility grub-install. There are many tutorials describing the process, here's one directly from Ubuntu help pages.
+
+
+
+CREDITS
 
 Установка OMV закончена.
 

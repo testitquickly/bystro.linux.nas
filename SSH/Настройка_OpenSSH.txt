@@ -14,7 +14,7 @@ Creation-Date: 2023-02-03T17:12:26+02:00
 ''sudo pacman -S openssh'' 
 
 **debian**
-''sudo apt-get install openssh''
+''sudo apt-get install openssh-server''
 
 ===== Настроить сервис =====
 

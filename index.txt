@@ -4,7 +4,7 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ====== INDEX ======
 
-Установка и настройка Network Attached Storage (NAS) на примере „OpenMediaVault 6”. Основано на Debian.
+Установка и настройка Network Attached Storage (NAS) на примере „OpenMediaVault”, который основан на Debian.
 
 [[+Про сборку NAS]]
 
@@ -24,6 +24,8 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 1. [[HDD:Про HDD в NAS]]
 2. [[HDD:Добавить HDD]]
+	a. [[HDD:Добавить HDD:Прописать label для HDD]]
+	b. [[HDD:Добавить HDD:Сделать короткий симлинк на HDD]]
 3. [[HDD:Настроить автоостановку HDD]]
 4. [[HDD:Зашифровать HDD]]
 5. [[HDD:Сделать RAID-массив]]
@@ -64,7 +66,7 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ===== Плагины OMV =====
 
-1. Установить [[omv-extras]]
+1. Установить Установка OMV:omv-extras
 
 ===== DLNA =====
 

@@ -128,7 +128,7 @@ User Home directory = Enabled
 
 === Установить плагин OMV-Extras ===
 
-В OMV Docker приходит через установку плагина OMV-Extras — [[omv-extras]]
+В OMV Docker приходит через установку плагина OMV-Extras — Установка OMV:omv-extras
 
 В итоге 
 * должен появиться новый пункт меню: System > //omv-extras//

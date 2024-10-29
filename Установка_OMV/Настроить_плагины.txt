@@ -3,5 +3,64 @@ Wiki-Format: zim 0.6
 Creation-Date: 2024-10-29T12:47:46+02:00
 
 ====== Настроить плагины ======
-Создан Вторник 29 октября 2024
 
+	С плагинами спешить не стоит. Они изрядно расширяют функциональность OMV, но в то же время приносят вероятностные сложности в настройке и безопасности NAS.
+
+	System > Plugins — вчитываться в описание каждого плагина, понимать его и решать, действительно ли он нужен. Любое сомнение трактуем в пользу отказа. 
+
+	Если какой-то плагин кажется интересным — записать его название и включить его только тогда, когда дойдут руки до соответствующей функциональности.
+
+	Ставить и удалять плагины надо **по-отдельности**. Иногда после установки плагина есть смысл ещё и полностью перезагрузить OMV.
+
+===== Установка omv-extras =====
+
+Расширение //omv-extras// позволяет подключить много других плагинов кроме штатных. Также оно ценно тем, что приносит сразу iptables, Docker, Portainer и Yacht (настраиваются по-отдельности). Тот же transmission без докера на OMV не поднять.
+
+См, https://wiki.omv-extras.org/
+
+==== Разрешить установку внешних плагинов ====
+
+''System'' 
+''> Update Management'' 
+''> Settings'' 
+''> Install updates from''
+* Community-maintained updates = Yes
+* Pre-release upddates = No
+
+==== Установить OMV-Extras ====
+
+Это опционально, но без него не будет [[Docker]], и вообще оно здорово расширяет возможности OMV.
+
+
+1. Зайти на NAS по ssh и выполнить
+
+''sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/installScript/raw/master/install | sudo bash''
+
+В норме файл скачивается и сразу выполняется. Подождать, пока всё ПОЛНОСТЬЮ завершится.
+
+	Линки на исходники могут поменяться, поэтому если будет сбой — см. инструкцию https://github.com/OpenMediaVault-Plugin-Developers/installScript/
+
+2. В браузере перейти на страницу OMV ([Ctrl+F5] если надо) и убедиться в том, что в разделе System появился новый пункт меню **OMV-Extras**.
+
+''System'' 
+''> Plugins''
+
+Убедиться в том, что нет ошибок.
+
+Если установлено что-то непонятное, сперва смотрим wiki.omv-extras.org и форум forum.openmediavault.org
+
+3. Просмотреть общий список. Уже установленные плагины отмечены зеленой блямбой. Если какой плагин интересует — кликнуть по нему > Install.
+
+4. Из общего списка плагинов установить важное/нужное, например
+
+''openmediavault-backup''
+''openmediavault-compose''
+''openmediavault-cputemp''
+''openmediavault-nut''
+''openmediavault-omvextrasorg''
+''openmediavault-resetperms''
+''openmediavault-remotemount''
+''openmediavault-sharerootfs''
+''openmediavault-wol''
+
+//Next step//: [[Настроить доступ к NAS по hostname]]
