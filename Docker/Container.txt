@@ -2,9 +2,11 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2024-10-20T12:49:01+03:00
 
-====== app ======
+====== Container ======
 
 [[+Calibre]]
 [[+Heimdall]]
+[[+Mail server]]
 [[+Plex]]
 [[+qBittorrent]]
+[[+Zimbra]]

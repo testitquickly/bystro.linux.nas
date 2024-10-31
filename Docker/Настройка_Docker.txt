@@ -137,4 +137,4 @@ Host key verification failed.
 
 This “Host key verification failed” error happens when the host key has changed on the openssh server. For this test, simply follow the instructions to remove the already trusted key from the known\_hosts file. If this error is encountered in the wild, first make sure to verify the host key change was valid and not malicious before proceeding.
 
-//Next step//: [[Импорт контейнеров]] 
+//Next step//: Импорт контейнеров 

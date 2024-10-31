@@ -1,0 +1,9 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-10-31T14:22:45+02:00
+
+====== Бэкапы ======
+
+[[+Про бэкапы]]
+[[Установка OMV:Настроить бэкап OMV]]
+[[+RSync]]

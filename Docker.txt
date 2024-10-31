@@ -22,7 +22,10 @@ Creation-Date: 2023-07-10T16:23:54+03:00
 
 1. [[+Установка Docker]]
 2. [[+Настройка Docker]]
-3. установить контейнер [[+app:qBittorrent]]
-4. [[+Импорт контейнеров]]
-5. [[+Гоняем Docker]]
-6. [[+Импорт контейнеров:Mail server]]
+3. установить
+	a. [[+Container:Calibre]]
+	b. [[+Container:Heimdall ]]
+	c. [[+Container:Mail server]]
+	d. [[+Container:Plex]]
+	e. [[+Container:qBittorrent]]
+4. [[+Гоняем Docker]]
