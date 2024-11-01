@@ -2,12 +2,15 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2023-02-03T22:19:34+02:00
 
-====== Расшарить каталог по Samba ======
+====== Расшарить каталог ======
+
+Шарить через SMB можно только те shared-каталоги, которые уже были добавлены (зарегистрированы) в OMV. См. [[Shared Folders:Добавить shared-каталог]]
 
 ''Services'' 
 ''> SMB/CIFS'' 
 ''> Shares'' 
 ''> [+ Add]''
+
 	* Enable = Да
 	* Shared folder = выбрать предлагаемый из списка \tire \textit{test}
 	* Comment= очень нужен, когда много каталогов
