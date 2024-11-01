@@ -1,35 +1,36 @@
 Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
-Creation-Date: 2023-01-31T17:36:11+02:00
+Creation-Date: 2024-11-01T22:25:34+02:00
 
 ====== WoL с ноутбука ======
 
-Установить wakeonlan для будущего обращения к NAS.
-
-Debian
+Сперва надо установить ''wakeonlan'' на своём Debian:
 
 ''sudo apt-get install wakeonlan''
 
-Manjaro
+Manjaro — через Pamac.  
 
-Через Pamac.  
-
-В AUR есть ''wakeonlan, а ещё есть gwakeonlan — GTK и Python.'' 
+	В их AUR есть ''wakeonlan, а ещё есть gwakeonlan — GTK и Python.'' 
 
 Обращение к удалённому устройству по MAC-адресу.
 
 '''
 #!/bin/bash
 	# Wake up NAS через роутер, 
-	# ждём 71 sec пока он проснётся, 
+	# ждём 81 sec (1 мин 20 сек)пока он проснётся, 
 	# открываем firefox с OMV. 
-	# Почему 71 — на самом деле нужно 70, но когда скрипт начинает работать, глаз замечает старт отсчёта обратного времени с 69-й секунды и мозг удивляется.
+	# Почему 81 — на самом деле нужно 80, но когда скрипт начинает работать, глаз замечает старт отсчёта обратного времени с 79-й секунды и мозг удивляется.
 
-firefox="/opt/firefox/firefox"
+'''
+''firefox="/opt/firefox/firefox -p astenix"''
+''device="B4:99:BA:BF:48:44"''
+''nas_ip="192.168.10.20"''
+''nas_url="http://tower.local:81/"''
+'''
     
 # Функция отсчёта времени
 function countdown(){
-for (( i=71; i>0; i--)); do
+for (( i=81; i>0; i--)); do
 	printf "\rОсталось $i секунд. Можно нажать AnyKey чтобы запинговать NAS немедленно."
 	read -s -n 1 -t 1 key
 	if [ $? -eq 0 ]
@@ -40,15 +41,19 @@ done
 }
 
 	# echo "Отослан сигнал пробуждения."
-wakeonlan B4:99:BA:BF:48:44
-
+wakeonlan $device
+	
+	# запускаем обратный отсчет
 countdown
-
+	
+	# дежурное сообщение
 echo "\nПингование в цикле. После успешного ответа откроется firefox."
-ping 192.168.10.20 | grep from -m 1
-
-$firefox http://tower.local:92/
+	
+	# пингуем
+ping $nas_ip | grep from -m 1
 '''
 
-
-//Next step//: 
+'''
+	# когда пинг вернулся — открываем браузер
+$firefox $nas_url
+'''

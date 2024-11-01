@@ -1,0 +1,80 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-01T00:10:22+02:00
+
+====== Убрать Quota ======
+
+Если в системе МНОГО юзеров, то разумно разрешать им «владеть» только небольшими участками дисков. Для этого надо [[Настроить Quota]].
+
+Если в системе только я (или family), то квоты на дисках можно (нужно) отключить.
+
+В итоге в корне каждого диска останутся файлы 
+* aquota.user
+* aquota.group
+
+Их можно игнорировать.
+
+В Debian отключение этих функций делается напрямую в файле ''/etc/fstab''. Но в OMV отключение квот делается только через файл ''/etc/openmediavault/config.xml''
+
+Сделать его бэкап:
+
+''cp /etc/openmediavault/config.xml /etc/openmediavault/config.xml.backup''
+
+Открыть:
+
+''mcedit /etc/openmediavault/config.xml''
+
+В секции “mntent” (их несколько — по одной на каждый диск) найти строку, которая начинается с ''<opts>''. Аккуратно убрать в каждой строке указание о квотах:
+
+''usrquota,grpquota,''
+
+Сохранить, выйти.
+
+Выйти из сессии ''root''. 
+
+Под своим юзером принудить OMV перечитать обновленный файл с настройками через  
+
+''sudo omv-salt deploy run fstab'' 
+
+Диски будут отмонтированы.
+
+Ожидаемый ответ:
+
+''Succeeded: ЧИСЛО (changed=6)''
+''Failed:     0''
+
+Если Failed = 0 — всё хорошо.
+
+Reboot.
+
+===== Отключить сервис Quota =====
+
+Важно:
+* из-под sudo
+* сервис quota отключен
+
+''systemctl status quota''
+''systemctl status quotaon''
+
+В обоих случаях ожидаемый ответ
+
+''Active: inactive (dead)''
+
+Если нет
+
+''systemctl stop quota && systemctl stop quotaon''
+
+Выгрузить оба сервиса и отключить их
+
+''sudo systemctl stop quota & sudo systemctl stop quotaon & sudo systemctl disable quota & sudo systemctl disable quotaon''
+
+Файлы aquota.user и aquota.group с дисков должны исчезнуть. Если нет:
+
+As root:
+
+''chattr -i aquota.user''
+''chattr -i aquota.group''
+''rm aquota.user''
+''rm aquota.group''
+
+//Next step//: [[index]]

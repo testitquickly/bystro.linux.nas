@@ -12,7 +12,7 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 ''> [+ Create]''
 
 2. Edit user > «General»:
-	* Name = ''nimda'' (это ''admin'' наоборот).
+	* Name = astenix 
 	* Comment = //Kore Nani Nekooooooo!//
 	* Email = туда могут ходить отчёты о работе сервера
 	* Password = придумать хардкорный
@@ -46,6 +46,8 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 
 ==== Сделать аккаунты ====
 
+	*todo Переписать про аккаунты
+
 1. Access Rights Management 
 ''> User'' 
 ''> Users'' 
@@ -69,4 +71,4 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 	* users — обязательная группа для всех юзеров, кроме гостей и лишенцев
 	* family
 
-//Next step//: [[index]]
+//Next step//: [[Убрать Quota]]

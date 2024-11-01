@@ -1,0 +1,67 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2023-02-03T22:19:15+02:00
+
+====== Добавить shared-каталог ======
+
+Пойдём по простому сценарию —
+* один сервер, 
+* один пользователь, 
+* один shared folder.
+
+===== Сделать shared-каталог на HDD =====
+
+Подразумевам, что этап [[HDD:Добавить HDD]] уже пройден.
+
+''Storage''
+''> Shared Folders'' 
+''>'' [+ Add]
+	* Name: ''abcd''
+	* Device: адрес диска, который уже смонтирован вроде ''/dev/sde1''
+	* Path: здесь автоматически прописывается значение из поля Name. Можно/Нужно поменять, если надо.
+	* Tag: опционально; если прописал тэг, надо дополнительно натыцнуть клавишу ”Enter“
+
+Save.
+
+===== Permissions =====
+
+These settings are used by the services to configure the user and group access rights. Please note that these settings have no effect on file system permissions. 
+
+''Storage''
+''> Shared Folders''
+''> кликнуть по строке с каталогом «abcd»'' 
+''> Permissions''
+
+Убрать всё. Это ACL. В норме ACL использовать [[https://wiki.omv-extras.org/doku.php?id=omv7:nas_permissions_omv7#general1|не надо]], потому что можно смело смешивать стандартные механизмы Linux Permissions от Debian и ''Acess Control List'' от OMV, но это может вызвать непредсказуемый батхёрт. ACL разумно использовать только когда какому-то юзеру надо ЯВНО запретить заходить в какой-то каталог.
+
+===== Acess Control List =====
+
+These settings are used by the services to configure the user and group access rights. Please note that these settings have no effect on file system permissions. 
+
+''Storage''
+''> Shared Folders''
+''> кликнуть по строке с каталогом «abcd»'' 
+''> ACL''
+
+Replace all existing permissions: Yes
+Apply permissions to files and subfolders: Yes
+
+Дальше два раздела
+
+==== File owner and group ====
+
+Owner: astenix
+Permissions: Read/Write/Execute
+
+Group: users
+Permissions: Read/Execute
+
+Others: Read only
+
+==== File access control lists ====
+
+Убрать всё (по-умолчанию пусто).
+
+Save.
+
+//Next step//: [[SMB:Расшарить каталог]]

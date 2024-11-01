@@ -98,7 +98,7 @@ User Home directory = Enabled
 
 ''mkdir backup composefiles containers data downloads media''
 
-4. Сделать каждый из этих каталогов shared — [[SMB:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+4. Сделать каждый из этих каталогов shared — [[Shared Folders:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
 
 Аккуратно к названиям каталогов. В системе не должно быть shared-каталогов с идентичным названием, даже если они «смотрят» в разные места. Разумно назвать докеровские shared-каталоги с приставкой вроде „dkr_backup”:
 

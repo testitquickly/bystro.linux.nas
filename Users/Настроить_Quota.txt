@@ -1,0 +1,54 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-01T00:15:19+02:00
+
+====== Настроить Quota ======
+
+В OMV они настраиваются 
+
+''Storage''
+''> File Systems''
+''> тыкнуть по «диску»''
+''> тыкнуть по иконке Quota''
+''> тыкнуть последовательно по юзерам или группам и в редакторе квоты задать её размер''
+
+Можно выполнить ту же задачу в консоли.
+
+==== Установить Quota Tools ====
+
+''sudo apt-get update && sudo apt-get install quota''
+
+==== Настроить файловые системы ====
+
+Аккуратно отредактировать файл ''/etc/fstab''. Для каждого диска, на котором должен работать механизм квот, надо добавить параметры:
+
+	# Это пример
+	/dev/sda1 /home ext4 defaults,__usrquota,grpquota__ 1 2
+
+После редактирования /etc/fstab надо перемонтировать файловую систему:
+
+''sudo mount -o remount /home''
+
+===== Сделать файл для БД квот =====
+
+''sudo quotacheck -cug /home''
+
+===== Включить квоты =====
+
+''sudo quotaon -vug /home''
+
+===== Установить квоты для Users и Groups =====
+
+Эта команда откроет редактор, в котором можно задать лимиты disk space и использования inode:
+
+''sudo edquota -u username''
+''sudo edquota -g groupname''
+
+Чтобы установить квоты для нескольких юзеров сразу, нужен параметр ''-p'':
+
+''sudo edquota -p prototype_user user1 user2''
+
+===== Проверить квоты =====
+
+''sudo repquota /home''
+

@@ -36,9 +36,9 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ===== Users =====
 
-1. [[Users:Про юзеров]]
-2. [[Users:Сделать “User home directory”]]
-3. [[Users:Добавить пользователей]]
+1. [[Users:Сделать “User home directory”]]
+2. [[Users:Добавить пользователей]]
+3. [[Users:Убрать Quota]]
 
 ===== SSH =====
 
@@ -48,16 +48,20 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 4. [[SSH:Подключиться к NAS по ssh]]
 5. [[SSH:Передача файлов по ssh]]
 
+===== Shared folders =====
+
+1. [[Shared Folders]]
+2. [[Shared Folders:Добавить shared-каталог]]
+
 ===== SMB =====
 
-1. [[SMB:Включить в OMV SMB CIFS]]
-2. [[SMB:Добавить shared-каталог]]
-3. [[SMB:Расшарить каталог по Samba]]
-4. [[SMB:Удалить shared-каталог из Samba]]
+1. [[SMB:Включить SMB-CIFS]]
+2. [[SMB:Расшарить каталог]]
+3. [[SMB:Удалить shared-каталог из Samba]]
 
 ===== Android =====
 
-1. *todo Подключение к NAS со смартфона
+1. [[Android]]
 
 ===== Бэкапы =====
 
@@ -77,14 +81,13 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 1. [[Docker:Установка Docker]]
 2. [[Docker:Настройка Docker]]
-3. установить
 	a. [[Docker:Container:Calibre]]
 	b. [[Docker:Container:Heimdall]]
 	c. [[Docker:Container:Mail server]]
 	d. [[Docker:Container:Plex]]
 	e. [[Docker:Container:qBittorrent]]
 	f. [[Docker:Container:Zimbra]]
-4. [[Docker:Гоняем Docker]]
+3. [[Docker:Гоняем Docker]]
 
 ===== Transmission =====
 
@@ -92,44 +95,33 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 
 ===== VPN =====
 
-	*todo VPN
+1. [[VPN]]
 
 ===== SSL =====
 
-	*todo Сертификат SSL
+1. [[SSL]]
 
 ===== Firewall =====
 
-	*todo firewall
+1. [[Firewall]]
 
 ===== FTP =====
 
-В принципе SMB делает то же самое. Рассмотреть sftp.
-
-	*todo FTP
-	*todo FTP Закинуть файлы по ftp через wget
+1. [[FTP]]
 
 ===== Wake-on-LAN =====
 
 1. [[Wake-on-LAN:WoL с ноутбука]]
-2. *todo WoL со смартфона
-3. *todo Автоматическое отключение NAS
+2. [[Wake-on-LAN:WoL со смартфона]]
+3. [[Wake-on-LAN:Автоматическое отключение NAS]]
 
 ===== ИБП =====
 
-	*todo ИБП
-
-1. Определить мощность питания NAS
-2. Определить верхнюю границу потребляемой мощности 
-3. Выбрать ИБП для покрытия расчитанной мощности
-4. Управлять ИБП из OMV
+1. [[ИБП]]
 
 ===== Apache и PHP =====
 
-	*todo LAMP
-
-1. Установить Apache
-2. Установить MariaDB
+1. [[LAMP]]
 
 ===== Защита NAS =====
 
@@ -143,4 +135,3 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 4. [[Приложения:Примонтировать удаленный каталог с библиотекой Calibre]]
 5. *todo Сделать симлинк в /usr/local/bin на исполняемый sh-файл
 6. *todo Добавить команду в меню приложений
-7. [[Docker:Container:Zimbra]]

@@ -1,0 +1,10 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-02T00:08:59+02:00
+
+====== FTP ======
+
+В принципе SMB делает то же самое. Рассмотреть sftp.
+
+	*todo FTP
+	*todo FTP Закинуть файлы по ftp через wget

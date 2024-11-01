@@ -1,7 +1,9 @@
 Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
-Creation-Date: 2023-01-31T17:35:29+02:00
+Creation-Date: 2024-11-01T22:27:54+02:00
 
 ====== Wake-on-LAN ======
 
 [[+WoL с ноутбука]]
+[[+WoL со смартфона]]
+[[+Автоматическое отключение NAS]]
