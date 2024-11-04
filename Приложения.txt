@@ -9,4 +9,4 @@ Creation-Date: 2023-02-03T02:03:17+02:00
 [[+Проброс портов]]
 [[tmp:Про установку Docker]]
 [[+Сделать алиас в .bashrc]]
-[[Docker:Container:Zimbra]]
+[[Docker:Импорт контейнеров:Zimbra]]

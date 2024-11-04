@@ -5,6 +5,18 @@ Creation-Date: 2024-10-08T20:18:37+03:00
 ====== tmp ======
 
 
+dhcp
+
+go root
+
+Mount Disk
+
+ssh
+
+UEFI
+
+Как сделать ярлыки на исполняемые sh-файлы
+
 ===== Установить Portainer =====
 
 Это web-ui для управления Docker. Аналоги: DockerUI, Shipyard.
