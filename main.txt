@@ -2,7 +2,7 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2022-03-16T21:21:14+02:00
 
-====== index ======
+====== main ======
 
 [[+about]]
 [[+Про сборку NAS]]
@@ -52,11 +52,22 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 1. [[Shared Folders]]
 2. [[Shared Folders:Добавить shared-каталог]]
 
+===== NFS =====
+
+1. [[NFS:Про NFS]]
+2. [[NFS:Настроить NFS]]
+3. [[NFS:Расшарить каталог]]
+4. [[NFS:Подключение с ноута]]
+5. [[NFS:Подключение с Android]]
+
 ===== SMB =====
 
-1. [[SMB:Включить SMB-CIFS]]
-2. [[SMB:Расшарить каталог]]
-3. [[SMB:Удалить shared-каталог из Samba]]
+1. [[SMB:Про SMB]]
+2. [[SMB:Настроить SMB-CIFS]]
+3. [[SMB:Расшарить каталог]]
+4. [[SMB:Подключение с ноута]]
+5. [[SMB:Подключение с Android]]
+6. [[SMB:Удалить shared-каталог из Samba]]
 
 ===== Android =====
 
@@ -79,18 +90,18 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 ===== Docker =====
 
 1. [[Docker:Установка Docker]]
-2. [[Docker:Настройка Docker]]
-	a. [[Docker:Container:Calibre]]
-	b. [[Docker:Container:Heimdall]]
-	c. [[Docker:Container:Mail server]]
-	d. [[Docker:Container:Plex]]
-	e. [[Docker:Container:qBittorrent]]
-	f. [[Docker:Container:Zimbra]]
+2. [[Docker:Настройка контейнеров]]
+	a. [[Docker:Импорт контейнеров:Calibre]]
+	b. [[:Docker:Импорт контейнеров:Heimdall ]]
+	c. [[Docker:Импорт контейнеров:Mail server]]
+	d. [[Docker:Импорт контейнеров:Plex]]
+	e. [[Docker:Импорт контейнеров:qBittorrent]]
+	f. [[Docker:Импорт контейнеров:Zimbra]]
 3. [[Docker:Гоняем Docker]]
 
 ===== Transmission =====
 
-Предпочитаю [[Docker:Container:qBittorrent]], но суть та же.
+Предпочитаю [[Docker:Импорт контейнеров:qBittorrent]], но суть та же.
 
 ===== VPN =====
 
@@ -134,3 +145,7 @@ Creation-Date: 2022-03-16T21:21:14+02:00
 4. [[Приложения:Примонтировать удаленный каталог с библиотекой Calibre]]
 5. *todo Сделать симлинк в /usr/local/bin на исполняемый sh-файл
 6. *todo Добавить команду в меню приложений
+
+--------------------
+
+Обновлено: 

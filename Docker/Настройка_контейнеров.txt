@@ -2,7 +2,7 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2023-07-10T19:05:59+03:00
 
-====== Настройка Docker ======
+====== Настройка контейнеров ======
 
 ==== Список запущенных (работающих) контейнеров ====
 
@@ -67,10 +67,32 @@ services:
 	restart: no
 '''
 
- 
+===== Добавить UMASK =====
 
+По-умолчанию файлы, которые будут приходить на HDD из сервисов в контейнерах, помечены правами юзера, который рулит докером — ''mydoker'', и права на них установлены так
+''-rw-r--r--'', что в числовом виде ''644''.
+
+	6 — для владельца файла (rw-): чтение и запись.
+	4 — для группы (r--): только чтение.
+	4 — для остальных (r--): только чтение.
+
+Сделаем так, чтобы юзер ''mydoker'' из сервиса в контейнере создавал файлы с правами 770.
+	6 — для владельца файла (rwx): чтение и запись и выполнение.
+	4 — для группы (rwx): чтение и запись и выполнение.
+	4 — для остальных (---): нет доступа.
+
+Это можно сделать через настройку umask в каждом контейнере, который будет создан через Docker Compose
+''services:''
+  ''your_service:''
+	''image: your_image''
+	''environment:''
+	  ''- UMASK=007''
+
+Учесть, что иногда службы в контейнерах могут перезаписывать значение umask.
 
 ===== Добавить ssh в Docker =====
+
+	*todo Добавить ssh в Docker
 
 After running through the commands above let’s test out how to use ssh when connecting to a docker container. For this example we will begin by creating the following docker compose file.
 
@@ -137,4 +159,4 @@ Host key verification failed.
 
 This “Host key verification failed” error happens when the host key has changed on the openssh server. For this test, simply follow the instructions to remove the already trusted key from the known\_hosts file. If this error is encountered in the wild, first make sure to verify the host key change was valid and not malicious before proceeding.
 
-//Next step//: Импорт контейнеров 
+//Next step//: [[Импорт контейнеров]]
