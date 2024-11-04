@@ -3,5 +3,8 @@ Wiki-Format: zim 0.6
 Creation-Date: 2024-11-03T18:20:07+02:00
 
 ====== Подключение с Android ======
-Создан Воскресенье 03 ноября 2024
 
+
+	*todo SMB с Android
+
+//Next step//: [[main]]
