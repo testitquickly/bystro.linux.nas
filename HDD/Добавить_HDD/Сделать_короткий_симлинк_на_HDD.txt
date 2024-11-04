@@ -10,7 +10,7 @@ Creation-Date: 2024-01-10T10:23:32+02:00
 
 Можно сделать один симлинк-файл:
 
-''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media media''
+''ln -s /srv/dev-disk-by-uuid-f8814ed9-9a5c-4e1c-8830-426968c/media''
 
 А можно сделать условный каталог (со множеством уровней вложенности):
 
@@ -26,7 +26,5 @@ Creation-Date: 2024-01-10T10:23:32+02:00
 
 ''lrwxrwxrwx 1 astenix users 59 окт 26 18:45 main -> /srv/dev-disk-by-uuid-a165a938-ffb4-4886-be67-4bd8786c8164/''
 ''lrwxrwxrwx 1 astenix users 74 окт 26 18:41 v1 -> /srv/dev-disk-by-uuid-3b52c281-2eb5-4209-a629-4d4f9334b017/v1''
-''lrwxrwxrwx 1 astenix users 59 окт 26 18:46 v2 -> /srv/dev-disk-by-uuid-8ad48aba-d0c5-4921-80b2-ab71d4ad77d8/''
-''lrwxrwxrwx 1 astenix users 61 окт 26 18:44 v3 -> /srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/v3''
 
-//Продолжить//: [[Добавить HDD]]
+//Next step//: [[Добавить HDD]]
