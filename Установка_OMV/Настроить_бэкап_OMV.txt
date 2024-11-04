@@ -77,7 +77,7 @@ Creation-Date: 2023-01-31T23:37:55+02:00
 
 Определить причину сбоя. Восстановить что-то можно только если всего лишь умер системный sata-SSD — его надо заменить. Если что-то оторвалось-перетерлось-сгорело — заменить, если заискрил сам компьютер — вряд ли нужно восстановление из бэкапа, потому что будет новое окружение и, вероятно, новые диски.
 
-	*todo !! Алгоритм восстановления системы
+	*todo !! Перевести алгоритм восстановления системы
 	
 https://forum.openmediavault.org/index.php?thread/43774-how-to-restore-omv-system-backup-made-with-openmediavault-backup-plugin/
 
@@ -198,10 +198,4 @@ If you still cannot boot, it is likely that Grub was not restored successfully. 
 
 To resolve this problem, reboot to SystemRescue media, and reinstall grub using the utility grub-install. There are many tutorials describing the process, here's one directly from Ubuntu help pages.
 
-
-
-CREDITS
-
-Установка OMV закончена.
-
-//Next step//: [[index]]
+//Next step//: [[Настроить плагины]]

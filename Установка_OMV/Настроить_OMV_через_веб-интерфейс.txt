@@ -54,6 +54,36 @@ System
 
  Install updates from = Community-maintained updates
 
-===== Plugins =====
+===== Network =====
 
-См. [[Настроить плагины]]
+''Network''
+''> General''
+
+Тут значения, которые были заданы при установке базовой системы — ''tower.local''
+
+''Network''
+''> Interfaces''
+
+Указано базовое сетевое устройство вроде ''enp2s0'' (Ethernet; может быть и Wi-Fi, если установлен).
+
+Тыкнуть по нему мышкой ''> Edit''
+
+''Network''
+''> Interfaces''
+''> Advanced settings''
+
+==== MAC address ====
+
+Указать действующий MAC address устройства.
+
+	Узнать текущий mac address:
+
+	''sudo ip a''
+
+	Посмотреть зачение для ''link/ether'', например „''b4:99:ba:bf:48:44''“.
+
+==== Wake-on-LAN ====
+
+Поставить галочку, это нужно для [[Wake-on-LAN]]
+
+//Next step//: [[Настроить доступ к NAS по hostname]]

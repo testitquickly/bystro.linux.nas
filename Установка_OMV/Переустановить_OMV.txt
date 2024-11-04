@@ -144,4 +144,4 @@ ii  openmediavault-wol                   7.0.2                                al
 
 Выбрать восстановление из архивного файла и молиться.
 
-//Next step//: [[index]]
+//Next step//: [[main]]

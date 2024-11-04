@@ -31,7 +31,6 @@ Creation-Date: 2024-10-29T12:47:46+02:00
 
 Это опционально, но без него не будет [[Docker]], и вообще оно здорово расширяет возможности OMV.
 
-
 1. Зайти на NAS по ssh и выполнить
 
 ''sudo wget -O - https://github.com/OpenMediaVault-Plugin-Developers/installScript/raw/master/install | sudo bash''
@@ -63,4 +62,18 @@ Creation-Date: 2024-10-29T12:47:46+02:00
 ''openmediavault-sharerootfs''
 ''openmediavault-wol''
 
-//Next step//: [[Настроить доступ к NAS по hostname]]
+=== Установить плагин //openmediavault-resetperms// ===
+
+''System'' 
+''> Plugins''
+''> Поиск'' //''openmediavault-resetperms''//
+''> Установить''
+
+Использовать при необходимости: 
+
+''Services'' 
+''> Reset Permissions''
+
+Установка OMV закончена.
+
+//Next step//: [[main]]
