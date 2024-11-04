@@ -6,4 +6,4 @@ Creation-Date: 2023-01-31T17:35:29+02:00
 
 	*todo Автоматическое отключение NAS
 
-//Next step//: [[index]]
+//Next step//: [[main]]
