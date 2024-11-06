@@ -60,7 +60,7 @@ su
 В этой команде сперва объявлена переменная ''MY_HDD'', в которой находится путь к корневому каталогу диска, на котором надо отдать всю власть юзеру ''astenix'' и членам группы ''users'' — чтение, запись и выполнение (''7''), а всем остальным — запретить всё (''0''), затем всё остальное:
 '''
 
-MY_HDD=/srv/dev-disk-by-uuid-3b52c281… && chown astenix:users -R $MY_HDD && chmod -R 770 $MY_HDD && echo -e "\nDone!"
+MY_HDD=/srv/dev-disk-by-uuid-3b52c281… && chown astenix:users -R $MY_HDD && chmod -R 770 $MY_HDD && echo -e "\nDone! — $MY_HDD"
 '''
 
 Подождать, пока команда отработает.
