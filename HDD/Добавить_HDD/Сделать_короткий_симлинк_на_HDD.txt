@@ -27,4 +27,4 @@ Creation-Date: 2024-01-10T10:23:32+02:00
 ''lrwxrwxrwx 1 astenix users 59 окт 26 18:45 main -> /srv/dev-disk-by-uuid-a165a938-ffb4-4886-be67-4bd8786c8164/''
 ''lrwxrwxrwx 1 astenix users 74 окт 26 18:41 v1 -> /srv/dev-disk-by-uuid-3b52c281-2eb5-4209-a629-4d4f9334b017/v1''
 
-//Next step//: [[Добавить HDD]]
+//Вернуться//: [[Добавить HDD]]
