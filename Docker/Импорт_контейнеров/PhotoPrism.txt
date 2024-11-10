@@ -1,0 +1,148 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-07T13:26:41+02:00
+
+====== PhotoPrism ======
+
+Есть плагин „PhotoPrism” для OMV. Его легко установить, но однажды он у меня завёлся легко и сразу, а однажды нет. Чтобы держать под контролем его настройки, есть резон поставить его самостоятельно, затем [[Настройка контейнеров:Отобразить контейнер в Compose - Files]]
+
+Также см. „[[LibrePhotos]]” — аналог  „PhotoPrism”.
+
+===== Сделать БД и пользователя =====
+
+''sudo mysql -u root -p''
+
+==== Сделать базу данных для PhotoPrism ====
+
+''CREATE DATABASE photoprism;''
+
+==== Сделать юзера и дать ему права на созданную базу данных ====
+
+''CREATE USER 'photoprism_user'@'localhost' IDENTIFIED BY 'photoprism_user_password';''
+''GRANT ALL PRIVILEGES ON photoprism.* TO 'photoprism_user'@'localhost';''
+''FLUSH PRIVILEGES;''
+''exit''
+
+==== Разрешить подключения к MariaDB извне ====
+
+Если плагин (или приложение) запускается на другом сервере или контейнере, нужно разрешить MariaDB принимать подключения по сети.
+
+''sudo mcedit /etc/mysql/mariadb.conf.d/50-server.cnf''
+
+Найти строку с параметром ''bind-address'' и изменить её на ''0.0.0.0'', чтобы разрешить подключения с любого IP:
+
+''bind-address = 0.0.0.0''
+
+==== Сохранить файл и перезапустить MariaDB ====
+
+''sudo systemctl restart mariadb''
+
+===== Поднять контейнер с PhotoPrism =====
+
+Перейти в каталог с настройками
+
+''cd /srv/dev-disk-by-uuid-9b3771d9-…/docker/composefiles/PhotoPrism''
+
+''wget https://dl.photoprism.app/docker/docker-compose.yml && mv docker-compose.yml PhotoPrism.yml''
+
+==== Настроить параметры подключения PhotoPrism к БД ====
+
+''mcedit PhotoPrism.yml''
+
+Хост базы данных: ''localhost'' или IP-адрес сервера, если база данных находится на другом сервере.
+Имя базы данных: ''photoprism''
+Имя пользователя: ''photoprism_user''
+Пароль: ''photoprism_user_password''
+
+=== Пример с пояснением параметров ===
+
+version: '3.7'
+
+services:
+  photoprism:
+	image: photoprism/photoprism:latest
+	container_name: photoprism
+	restart: no #unless-stopped
+	ports:
+	  - "2342:2342" # Внешний порт для доступа к интерфейсу PhotoPrism
+	environment:
+	  PHOTOPRISM_ADMIN_PASSWORD: "укажите_пароль"  # Пароль администратора
+	  PHOTOPRISM_DEBUG: "false"  # Логирование в отладочном режиме
+	  PHOTOPRISM_PUBLIC: "false"  # Открытый доступ (true для публичного)
+	  PHOTOPRISM_READONLY: "false"  # Режим только для чтения
+	  PHOTOPRISM_UPLOAD_NSFW: "false"  # Отключение загрузки контента 18+
+	  PHOTOPRISM_DATABASE_DRIVER: "mysql"  # Используем MySQL
+	  PHOTOPRISM_DATABASE_SERVER: "db:3306"  # Имя хоста базы данных
+	  PHOTOPRISM_DATABASE_NAME: "photoprism"  # Имя базы данных
+	  PHOTOPRISM_DATABASE_USER: "photoprism"  # Имя пользователя базы данных
+	  PHOTOPRISM_DATABASE_PASSWORD: "укажите_пароль_бд"  # Пароль для базы данных
+	  PHOTOPRISM_SITE_URL: "http://<ваш_сервер>:2342/"  # URL сайта PhotoPrism
+	  PHOTOPRISM_SITE_CAPTION: "My PhotoPrism"
+	  PHOTOPRISM_HTTP_PORT: 2342
+	volumes:
+	  - /srv/dev-disk-by-label-<имя_диска>/photoprism/storage:/photoprism/storage
+	  - /srv/dev-disk-by-label-<имя_диска>/photoprism/originals:/photoprism/originals
+	  - /srv/dev-disk-by-label-<имя_диска>/photoprism/import:/photoprism/import
+	networks:
+	  - photoprism_network
+
+  db:
+	image: mariadb:10.11 # Образ для MariaDB
+	restart: unless-stopped
+	environment:
+	  MYSQL_ROOT_PASSWORD: "укажите_пароль_для_root"  # Пароль root для базы данных
+	  MYSQL_DATABASE: "photoprism"  # Имя базы данных для PhotoPrism
+	  MYSQL_USER: "photoprism"  # Имя пользователя базы данных
+	  MYSQL_PASSWORD: "укажите_пароль_бд"  # Пароль пользователя базы данных
+	volumes:
+	  - /srv/dev-disk-by-label-<имя_диска>/photoprism/database:/var/lib/mysql
+	networks:
+	  - photoprism_network
+
+networks:
+  photoprism_network:
+	driver: bridge
+
+Описание параметров
+
+	Порт для PhotoPrism: ports в разделе photoprism:
+		"2342:2342" — порт, через который PhotoPrism будет доступен. В браузере это будет http://<ваш_сервер>:2342.
+
+	Переменные окружения для PhotoPrism:
+		PHOTOPRISM_ADMIN_PASSWORD: Укажите пароль администратора.
+		PHOTOPRISM_DATABASE_SERVER: Оставьте "db:3306", так как db — имя контейнера базы данных.
+		PHOTOPRISM_DATABASE_USER и PHOTOPRISM_DATABASE_PASSWORD: укажите имя пользователя и пароль для подключения к базе данных.
+		PHOTOPRISM_SITE_URL: Укажите адрес вашего сервера для доступа к PhotoPrism (например, "http://<ваш_сервер>:2342").
+		PHOTOPRISM_HTTP_PORT: Порт для PhotoPrism (оставьте 2342).
+
+	Тома для хранения данных:
+		/srv/dev-disk-by-label-<имя_диска>/photoprism/storage: для хранения кэша, базы данных и других файлов.
+		/srv/dev-disk-by-label-<имя_диска>/photoprism/originals: директория для оригиналов фотографий.
+		/srv/dev-disk-by-label-<имя_диска>/photoprism/import: директория для файлов, которые вы хотите импортировать в PhotoPrism.
+
+	Настройки базы данных MariaDB (сервис db):
+		MYSQL_ROOT_PASSWORD: пароль пользователя root базы данных.
+		MYSQL_DATABASE: имя базы данных для PhotoPrism.
+		MYSQL_USER и MYSQL_PASSWORD: имя пользователя и пароль для PhotoPrism.
+
+	Сеть:
+		photoprism_network — общая сеть для контейнеров PhotoPrism и базы данных MariaDB.
+
+
+
+
+
+Начнётся скачивание файлов и запуск контейнера.
+
+'''
+time="2024-11-07T16:09:14Z" level=info msg="config: waiting for the database to become available"
+time="2024-11-07T16:10:14Z" level=error msg="Error 1045 (28000): Access denied for user 'photoprism'@'172.19.0.3' (using password: YES)"
+/opt/photoprism/bin/photoprism start
+time="2024-11-07T16:10:25Z" level=info msg="config: waiting for the database to become available"
+'''
+
+https://www.reddit.com/r/photoprism/comments/uklnzd/idiots_guide_to_photoprism/
+
+https://docs.photoprism.app/getting-started/docker-compose/
+
+https://roman-academy.medium.com/how-to-setup-install-photoprism-using-docker-compose-629fd0a810c1

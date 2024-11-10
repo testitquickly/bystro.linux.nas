@@ -37,7 +37,7 @@ environment:
 
 WEBUI_PORT=8080 — задать нестандартный, на который вряд ли кто-то заходит
 
-	WEBUI_PORT=8180
+	WEBUI_PORT=8100
 
 volumes:
 	  - CHANGE_TO_COMPOSE_DATA_PATH/qbittorrent/config:/config
@@ -67,12 +67,9 @@ volumes:
 	Полный путь к каталогу, в котором находишься, можно вывести на экран командой ''pwd''
 
 ''ports:''
-	  ''- 8080:8080''
+	  ''- 8100:8100''
 
 	заменить на ранее выбранный WEBUI_PORT
-	
-''ports:''
-	  ''- 8180:8180''
 
 ===== Добавить UMASK =====
 

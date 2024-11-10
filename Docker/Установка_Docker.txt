@@ -136,8 +136,11 @@ Network
 	Owner of directories and files = ''mydoker''
 	Group: ''sudo''
 	Permissions of directories and files: ''Administrator - read/write, Users - no access, Others - no access''
+
 Указать shared folder для Data: ''dkr.data''
+
 Указать shared folder для Backup: ''dkr.backup''
+
 Указать Docker Storage: 
 	по-умолчанию указано ''/var/lib/docker'' — но там еще ничего нет. Тут надо указать диск и каталог, в котором Docker будет постоянно «жить и работать». Какой каталог будет указан — там и появится Docker. 
 	я уже сделал в каталоге с файлами Docker новый каталог с именем “''app''”.

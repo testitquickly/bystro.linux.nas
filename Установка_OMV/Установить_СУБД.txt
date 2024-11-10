@@ -1,0 +1,59 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-09T03:04:56+02:00
+
+====== Установить СУБД ======
+
+Опционально, нужно для установки и тонкой (точной) настройки некоторых сервисов в контейнерах Docker.
+
+===== Установить MariaDB =====
+
+''sudo apt update && sudo apt install mariadb-server && sudo systemctl status mariadb''
+
+Ожидаемый ответ
+
+''Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; preset: enabled)''
+	 ''Active: active (running) s''
+
+Если сервис не запущен:
+
+''sudo systemctl start mariadb''
+
+Включить автоматический запуск MariaDB при старте системы:
+
+''sudo systemctl enable mariadb''
+
+==== Конфигурация MariaDB ====
+
+''sudo mysql_secure_installation''
+
+Будет предложено настроить пароль для пользователя ''root'' (можно установить пустой) и разные параметры безопасности для MariaDB. 
+
+'''
+Switch to unix_socket authentication [Y/n] n
+Change the root password? [Y/n] n
+Remove anonymous users? [Y/n] Y
+Disallow root login remotely? [Y/n] Y
+Remove test database and access to it? [Y/n] Y
+Reload privilege tables now? [Y/n] Y
+'''
+
+==== Проверка подключения ====
+
+''sudo mysql -u root -p''
+
+Введите пароль, который вы установили на шаге конфигурации (был пустой?).
+
+''SHOW DATABASES;''
+
+Это должно вывести список баз данных, если MariaDB настроена правильно.
+
+===== Интеграция с OMV =====
+
+Настроить MariaDB для работы с плагинами вроде PhotoPrism.
+
+''sudo apt install mariadb-client''
+
+Установка OMV закончена.
+
+//Return//: [[main]]

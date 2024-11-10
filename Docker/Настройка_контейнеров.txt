@@ -20,6 +20,11 @@ Creation-Date: 2023-07-10T19:05:59+03:00
 
 ''docker start myexample''
 
+==== Остановить контейнер вручную ====
+
+''docker stop myexample''
+
+
 Если контейнер находится в состоянии Exited, вы можете получить причину выхода с помощью команды:
 
 ''docker inspect --format='{{.State.ExitCode}}' pigallery2''

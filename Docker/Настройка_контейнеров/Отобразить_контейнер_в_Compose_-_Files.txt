@@ -1,0 +1,35 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-07T17:33:55+02:00
+
+====== Отобразить контейнер в Compose - Files ======
+
+Можно самостоятельно установить Docker-контейнер в консоли, настроить и затем отобразить его в OMV в разделе ''Services > Compose > Files''. 
+
+===== Сделать подкаталог для нового контейнера =====
+
+Его надо создать в каталоге, который отслеживает OMV через настройки плагина //''openmediavault-compose''// в ''Services > Compose > Settings'' в разделе „Compose Files”.
+
+Например, для нового контейнера ''LibrePhotos'':
+
+''/srv/dev-disk-by-uuid-9b3771d9-…/docker/composefiles/LibrePhotos''
+
+===== Создать конфиг-файл *.yml =====
+
+''/srv/dev-disk-by-uuid-9b3771d9-…/docker/composefiles/LibrePhotos/LibrePhotos.yml''
+
+Прописать в него все настройки, которые могут быть необходимы.
+
+===== Запустить контейнер вручную =====
+
+Из каталога с конфиг-файлом
+
+''docker compose -f LibrePhotos.yml up -d''
+
+Если всё хорошо, то контейнер поднимется и автоматически станет доступным для OMV.
+
+OMV периодически сканирует доступные файлы ''*.yml'' в каталоге Compose. Если контейнер не отображается сразу, можно принудить OMV к поиску новых файлов
+
+''sudo omv-salt deploy run compose'' 
+
+Контейнер должен отобразиться в разделе ''Services > Compose > Files'' в OMV.

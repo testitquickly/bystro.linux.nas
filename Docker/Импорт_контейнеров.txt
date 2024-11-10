@@ -6,7 +6,9 @@ Creation-Date: 2024-10-20T12:49:01+03:00
 
 [[+Calibre]]
 [[+Heimdall]]
+[[+LibrePhotos]]
 [[+Mail server]]
+[[+PhotoPrism]]
 [[+Plex]]
 [[+qBittorrent]]
 [[+Zimbra]]
