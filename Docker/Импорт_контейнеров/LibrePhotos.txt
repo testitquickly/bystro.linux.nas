@@ -4,6 +4,7 @@ Creation-Date: 2024-11-07T04:37:48+02:00
 
 ====== LibrePhotos ======
 
+	*todo !!! Удалить файл про LibrePhotos
 
 Создайте файл Compose через URL:
 
