@@ -1,0 +1,197 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-12T17:11:42+02:00
+
+====== Установить Piwigo ======
+
+Без Docker, по-старинке.
+
+===== Установить компоненты для веб-хостинга =====
+
+''sudo apt update && sudo apt install apache2 mariadb-server php php-mysql php-gd php-xml php-json php-curl libapache2-mod-php8.2 phpmyadmin -y''
+
+Не факт, что ''libapache2-mod-php8.2'' будет именно версии 8.2. Ориентироваться по ситуации.
+
+===== Настроить базу данных =====
+
+''sudo mysql -u root''
+
+==== Создать базу данных для Piwigo и нового пользователя ====
+
+	''CREATE DATABASE piwigo;''
+	''CREATE USER 'piwigouser'@'localhost' IDENTIFIED BY 'piwigopass';''
+	''GRANT ALL PRIVILEGES ON piwigo.* TO 'piwigouser'@'localhost';''
+	''FLUSH PRIVILEGES;''
+	''EXIT;''
+
+===== Распаковать файлы Piwigo =====
+
+Заранее должно быть скачано с https://piwigo.org/get-piwigo и распаковано на одном из HDD. Но можно всё сделать в консоли.
+
+Снять файлы:
+
+''wget https://piwigo.org/download/dlcounter.php?code=latest -O piwigo.zip''
+
+Распаковать всё в общий каталог www:
+
+''sudo unzip piwigo.zip -d /var/www/html && sudo mv /var/www/html/piwigo /var/www/html/piwigo''
+
+Установить права доступа:
+
+''sudo chown -R www-data:www-data /var/www/html/piwigo && sudo chmod -R 755 /var/www/html/piwigo''
+
+===== Настроить phpMyAdmin =====
+
+==== Сделать линк на phpmyadmin в ''/usr/share'' ====
+
+''sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin && sudo systemctl restart apache2''
+
+==== Установить версию PHP для Apache ====
+
+	Узнать текущую версию PHP
+
+	''php -v''
+
+	Не факт, что надо, но если надо будет установить определенную версию php
+
+	'''
+	sudo apt update
+	sudo apt install -y software-properties-common
+	sudo add-apt-repository ppa:ondrej/php
+	sudo apt update
+	sudo apt install php7.4
+	'''
+
+Например, PHP у нас 8.2.24. Ориентируемся только по мажорным версиям.
+
+Если ранее была установлена более старая версия (например, 8.1 или 7.4), её модуль надо сперва отключить. Если не была — проигнорировать эту команду.
+
+''sudo a2dismod php7.4''
+
+Включить модуль PHP 8.2 в Apache
+
+''sudo a2enmod php8.2''
+
+После этого надо перезапустить apache
+
+''sudo systemctl restart apache2''
+
+==== Настроить phpMyAdmin ====
+
+Если это первая настройка — скопировать дефолтный набор:
+
+''sudo cp /var/www/html/phpmyadmin/config.sample.inc.php /var/www/html/phpmyadmin/config.inc.php''
+
+Если нет
+
+''sudo mcedit /var/www/html/phpmyadmin/config.inc.php''
+
+Основные настройки
+
+'''
+<?php
+/* Servers configuration */
+$i = 0;
+
+/* Server: localhost [1] */
+$i++;
+$cfg['Servers'][$i]['host'] = 'tower.local'; // или IP вашего MySQL-сервера
+$cfg['Servers'][$i]['auth_type'] = 'cookie'; // способ аутентификации (cookie предпочтительнее)
+$cfg['Servers'][$i]['user'] = ''; // имя пользователя, если используется, иначе оставить пустыи
+$cfg['Servers'][$i]['password'] = ''; // пароль, если используется, иначе оставить пустыи
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+
+/* phpMyAdmin configuration storage */
+$cfg['Servers'][$i]['pmadb'] = 'phpmyadmin'; // имя базы данных для хранения данных конфигурации
+
+$cfg['blowfish_secret'] = 'random_secret_key_here'; // сгенерировать уникальный
+'''
+
+=== Создать секретный ключ ===
+
+''openssl rand -base64 32''
+
+Перезапустить Апач
+
+''sudo systemctl restart apache2''
+
+Открыть в браузере
+
+''http://tower.local/phpmyadmin/''
+
+phpMyAdmin должен работать.
+
+''piwigouser/piwigopass''
+
+===== Настроить Apache =====
+
+Настроить доступ к phpMyAdmin
+
+''sudo ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin''
+
+==== Сделать файл конфигурации Apache для Piwigo ====
+
+''sudo mcedit /etc/apache2/sites-available/piwigo.conf''
+
+Вставить:
+
+'''
+<VirtualHost *:80>
+	ServerAdmin astenix@testitquickly.com
+	DocumentRoot /var/www/html/piwigo
+	ServerName piwigo.local
+
+	<Directory /var/www/html/piwigo>
+		AllowOverride All
+		Require all granted
+	</Directory>
+
+	ErrorLog ${APACHE_LOG_DIR}/piwigo_error.log
+	CustomLog ${APACHE_LOG_DIR}/piwigo_access.log combined
+</VirtualHost>
+'''
+
+Уточнить
+
+''ServerName piwigo.local''
+
+Если надо открывать сайт через другой порт — уточнить это в первой строке:
+
+'''
+<VirtualHost *:8002>
+'''
+
+==== Активировать конфигурацию сайта и перезапустить Apache ====
+
+''sudo a2ensite piwigo && sudo a2enmod rewrite && sudo systemctl restart apache2''
+
+sudo systemctl restart apache2
+
+''systemctl reload apache2''
+
+==== Выполнить установку Piwigo ====
+
+Открыть в браузере
+
+''http://tower.local/piwigo/install.php''
+
+Хост MySQL	''piwigo.local''
+Пользователь	''piwigouser''
+Пароль	''piwigopass''
+Имя базы данных	''piwigo''
+Префикс таблиц в базе данных	''piw''
+Имя пользователя	''Alexei''
+Пароль	''piwigopass''
+Адрес электронной почты	''mail@tower.local''
+
+Дать доступ своему юзеру в каталог для импорта
+
+''sudo chown -R astenix:users /var/www/html/piwigo/galleries && sudo chmod -R 777 /var/www/html/piwigo/galleries''
+
+Внимание: имена папок и файлов должны содержать только латинские буквы, цифры, "-", "_" или ".". Не используйте пробелы и спецсимволы.
+
+Когда файлы правильно размещены в папках, выберите: Администрирование » Инструменты » Синхронизация
+
+sudo chmod -R 755 /var/www/html/piwigo/galleries
+sudo chown -R www-data:users /var/www/html/piwigo/galleries
+sudo systemctl restart apache2

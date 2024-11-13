@@ -1,0 +1,64 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-12T20:36:07+02:00
+
+====== Piwigo ======
+
+См. также [[Приложения:Установить Piwigo]] по-старинке, без докер.
+
+===== Создать каталог для установки Piwigo =====
+
+Это будет корневой каталог, в котором будут находиться файлы конфигурации Docker для Piwigo и его базы данных:
+
+''mkdir /piwigo && cd /piwigo''
+
+===== Сделать файл docker-compose.yml =====
+
+В каталоге ''/piwigo''. Этот файл создаст контейнеры для Piwigo и MariaDB (рекомендуемая база данных для Piwigo):
+
+''mcedit docker-compose.yml''
+
+Содержимое (перечитать и переправить с учетом своих настроек):
+
+''version: '3.7'''
+
+''services:''
+  ''piwigo:''
+	''image: piwigo/piwigo:latest''
+	''container_name: piwigo''
+	''depends_on:''
+	  ''- mariadb''
+	''ports:''
+	  ''- "8080:80"''
+	''environment:''
+	  ''PIWIGO_DB_HOST: mariadb''
+	  ''PIWIGO_DB_USER: piwigouser''
+	  ''PIWIGO_DB_PASSWORD: piwigopass''
+	  ''PIWIGO_DB_NAME: piwigo''
+	''volumes:''
+	  ''- ./piwigo:/var/www/html''
+	''restart: unless-stopped''
+
+  ''mariadb:''
+	''image: mariadb:10.5''
+	''container_name: mariadb''
+	''environment:''
+	  ''MYSQL_ROOT_PASSWORD: rootpassword''
+	  ''MYSQL_DATABASE: piwigo''
+	  ''MYSQL_USER: piwigouser''
+	  ''MYSQL_PASSWORD: piwigopass''
+	''volumes:''
+	  ''- ./mariadb:/var/lib/mysql''
+	''restart: unless-stopped''
+
+===== Запустить Docker Compose =====
+
+''docker-compose up -d''
+
+===== Настроить Piwigo через веб-интерфейс =====
+
+В браузере открыть [[http://NAS_IP:8080]] — или какой порт был указан в файле yml
+
+Указать имя базы данных (piwigo), пользователя (piwigouser), и пароль (piwigopass), которые заданы в docker-compose.yml.
+
+Также создать учетную запись администратора портала piwigo.

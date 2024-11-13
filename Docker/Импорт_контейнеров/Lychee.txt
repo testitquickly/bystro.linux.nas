@@ -1,0 +1,107 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2024-11-12T15:47:53+02:00
+
+====== Lychee ======
+
+См. также [[Приложения:Про выбор платформы для фотохостинга]]
+
+===== Сделать базу данных в MariaDB =====
+
+Запустить контейнер MariaDB:
+
+''sudo docker-compose up -d mariadb''
+
+Если не работает — алярм.
+
+==== Подключиться к MariaDB ====
+
+''sudo docker exec -it mariadb mysql -u root -p''
+
+Если в ответ
+
+''OCI runtime exec failed: exec failed: unable to start container process: exec: "mysql": executable file not found in $PATH: unknown''
+
+это означает, что утилита ''mysql'' отсутствует внутри контейнера. Используем обходной путь
+
+''sudo docker exec -it mariadb mariadb -u root -p''
+
+Ввести ''rootpass'' (условный пароль для ''root'', который будет позже задан в docker-compose.yml). В принципе должен быть свой и посложнее, но для проверки проекта сойдёт и так.
+
+==== Создать базу данных и пользователя для Lychee ====
+
+''CREATE DATABASE lychee;''
+''CREATE USER 'lycheeuser'@'%' IDENTIFIED BY 'lycheepass';''
+''GRANT ALL PRIVILEGES ON lychee.* TO 'lycheeuser'@'%';''
+''FLUSH PRIVILEGES;''
+''EXIT;''
+
+==== Собрать настройки для docker-compose.yml ====
+
+''environment:''
+  ''- DB_CONNECTION=mysql''
+  ''- DB_HOST=mariadb''
+  ''- DB_DATABASE=lychee''
+  ''- DB_USERNAME=lycheeuser''
+  ''- DB_PASSWORD=lycheepass''
+
+===== Подготовить контейнер Lychee =====
+
+Зайти в каталог с контейнерами.
+
+''mkdir -p ~/lychee && cd ~/lychee''
+
+Сделать файл
+
+''mcedit docker-compose.yml''
+
+Вставить это
+
+'''
+version: '3'
+
+services:
+  lychee:
+	image: lycheeorg/lychee:latest
+	container_name: lychee
+	ports:
+	  - "8080:80"
+	environment:
+	  - DB_HOST=mariadb
+	  - DB_USERNAME=lycheeuser
+	  - DB_PASSWORD=lycheepass
+	  - DB_DATABASE=lychee
+	depends_on:
+	  - mariadb
+	volumes:
+	  - ./uploads:/uploads
+	  - ./sym:/sym
+	  - ./conf:/conf
+
+  mariadb:
+	image: mariadb:latest
+	container_name: mariadb
+	environment:
+	  - MYSQL_ROOT_PASSWORD=rootpass
+	  - MYSQL_DATABASE=lychee
+	  - MYSQL_USER=lycheeuser
+	  - MYSQL_PASSWORD=lycheepass
+	volumes:
+	  - ./mysql_data:/var/lib/mysql
+'''
+
+Пересмотреть, продумать настройки каталогов и порт, по которому сервис будет доступен.
+
+===== Запустить контейнер Lychee =====
+
+''docker-compose up -d lychee''
+
+==== Открыть Lychee в браузере ====
+
+http://localhost:8080
+
+пройти до страницы «Set Up Admin Account»
+
+''lychee-admin / lychee-admin123''
+
+Пройти дальше, залогиниться под «Admin Account» и перейти к настройкам проекта.
