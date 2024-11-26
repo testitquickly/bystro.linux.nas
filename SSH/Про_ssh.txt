@@ -28,6 +28,6 @@ OMV принимает public key только двух форматов:
 
 В Linux это ’PuTTY’ тоже есть:
 
-	sudo ''aptitude install putty && putty &''
+''sudo aptitude install putty && putty &''
 
 //Next step//: [[SSH:Настройка OpenSSH]]

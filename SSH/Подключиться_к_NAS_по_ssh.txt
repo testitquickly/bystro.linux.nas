@@ -16,9 +16,7 @@ Creation-Date: 2023-02-03T18:55:12+02:00
 
 Это стандартный способ закинуть свой ssh-ключ на удалённый сервер:
 
-'''
-ssh-copy-id login@192.168.50.20
-'''
+''ssh-copy-id login@192.168.50.20''
 
 но в случае с OMV лучше добавлять личные ssh-ключи каждому пользователю по-отдельности. Поэтому:
 
@@ -68,7 +66,7 @@ ssh-copy-id login@192.168.50.20
 
 В консоли будет указан логи и ресурс, к которому произошло подключение:
 
-	login@tower:~$ 
+	''login@tower:~$'' 
 
 В файле ‘~/.ssh/known_hosts‘ появится запись о новом подключении. Если удалить этот файл или весь каталог '.ssh', то процесс «знакомства» повторится при последующем подключении.
 
@@ -78,6 +76,70 @@ ssh-copy-id login@192.168.50.20
 * или в OMV удалить существующего юзера 'login' и создать нового (с новым ssh-ключом)
 * или в OMV создать нового юзера с другим именем, и не создавать для него ssh-подключение
 * или в OMV создать нового юзера с другим именем, и создать для него новый ssh-ключ
+
+===== Убрать дежурное сообщение при логине =====
+
+После каждого подключения в консоль выводится что-то вроде
+
+'''
+Linux tower 6.1.0-27-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.115-1 (2024-11-01) x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Mon Nov 25 06:19:27 2024 from 192.168.50.11
+'''
+
+Это можно убрать.
+
+1)
+
+''sudo mcedit /etc/pam.d/sshd''
+
+Найти строки
+
+''# Print the message of the day upon successful login.''
+''# This includes a dynamically generated part from /run/motd.dynamic''
+''# and a static (admin-editable) part from /etc/motd.''
+''session    optional     pam_motd.so  motd=/run/motd.dynamic''
+''session    optional     pam_motd.so noupdate''
+
+Закомментировать последние две.
+
+2)
+
+То же самое найти и закомментировать в файле
+
+''sudo mcedit /etc/pam.d/login''
+
+Также в файле ''login'' закомментировать строку
+
+''# Prints the last login info upon successful login''
+''# (Replaces the `LASTLOG_ENAB' option from login.defs)''
+''session    optional   pam_lastlog.so''
+
+3)
+
+В файле 
+
+''sudo mcedit /etc/ssh/sshd_config'' 
+
+найти строку
+
+''PrintLastLog yes''
+
+и поменять её на 
+
+''PrintLastLog no''
+
+4)
+
+Перезапустить SSH демон
+
+''sudo systemctl restart sshd''
 
 ===== Алиас в .bashrc =====
 

@@ -24,7 +24,6 @@ Creation-Date: 2023-07-10T19:05:59+03:00
 
 ''docker stop myexample''
 
-
 Если контейнер находится в состоянии Exited, вы можете получить причину выхода с помощью команды:
 
 ''docker inspect --format='{{.State.ExitCode}}' pigallery2''
@@ -163,5 +162,15 @@ ECDSA host key for [172.21.0.10]:2222 has changed and you have requested strict 
 Host key verification failed.
 
 This “Host key verification failed” error happens when the host key has changed on the openssh server. For this test, simply follow the instructions to remove the already trusted key from the known\_hosts file. If this error is encountered in the wild, first make sure to verify the host key change was valid and not malicious before proceeding.
+
+===== Удалить контейнер =====
+
+''docker ps -a''
+
+См. в результатах ''CONTAINER ID''
+
+Принудительная остановка и удаление (можно удалить несколько подряд):
+
+''docker rm -f 123abc 456qwe''
 
 //Next step//: [[Импорт контейнеров]]
