@@ -22,27 +22,27 @@ Creation-Date: 2023-02-03T17:12:26+02:00
 
 Но если надо:
 
-''sudo mcedit /etc/ssh/sshd_config''
+''sudo mcedit /etc/ssh/ssh_config''
 
 ===== Запустить сервис SSH =====
 
-''sudo systemctl enable sshd.service && sudo systemctl start sshd.service && sudo systemctl status sshd.service''
+''sudo systemctl enable ssh.service && sudo systemctl start ssh.service && sudo systemctl status ssh.service''
 
 Сервис самостоятельно пропишется в автозапуске.
 
 ===== Проверить статус сервиса SSH =====
 
-''sudo systemctl status sshd.service''
+''sudo systemctl status ssh.service''
 
 По-умолчанию сервис OpenSSH должен быть отключён:
 
-''sshd.service - OpenSSH Daemon''
+''ssh.service - OpenSSH Daemon''
 ''Loaded: loaded (/usr/lib/systemd/system/sshd.service; disabled; preset: disabled)''
 ''Active:'' __''inactive''__ ''(dead)''
 
 Когда он включён:
 
-''sshd.service - OpenSSH Daemon''
+''ssh.service - OpenSSH Daemon''
 ''Loaded: loaded (/usr/lib/systemd/system/sshd.service; enabled; preset: disabled)''
 ''Active:'' __''active''__ ''(running) since Fri 2023-02-03 15:30:28 EET; 2h 37min ago''
 

@@ -12,11 +12,11 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 ''> [+ Create]''
 
 2. Edit user > «General»:
-	* Name = astenix 
+	* Name = ''astenix''
 	* Comment = //Kore Nani Nekooooooo!//
 	* Email = туда могут ходить отчёты о работе сервера
 	* Password = придумать хардкорный
-	* Shell = /bin/sh
+	* Shell = ''/bin/bash''
 
 3. Edit user > «Groups» (настроить особые привилегии):
 	* admin
@@ -42,7 +42,7 @@ Creation-Date: 2023-02-03T02:00:50+02:00
 ''> Group'' 
 ''>'' [+ Add]
 
-Условно назвать её „family”.
+Условно назвать её „''family''”.
 
 В разделе Privileges настраивается доступ к разных shares, которые уже существуют. Сюда можно вернуться позже (необязательно).
 
