@@ -129,7 +129,7 @@ Last login: Mon Nov 25 06:19:27 2024 from 192.168.50.11
 
 найти строку
 
-''PrintLastLog yes''
+''#PrintLastLog yes''
 
 и поменять её на 
 
