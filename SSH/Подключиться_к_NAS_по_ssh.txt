@@ -125,13 +125,13 @@ Last login: Mon Nov 25 06:19:27 2024 from 192.168.50.11
 
 В файле 
 
-''sudo mcedit /etc/ssh/sshd_config'' 
+''sudo mcedit /etc/ssh/sshd_config''
 
 найти строку
 
 ''#PrintLastLog yes''
 
-и поменять её на 
+поменять её на 
 
 ''PrintLastLog no''
 
