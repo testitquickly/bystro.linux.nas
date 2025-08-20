@@ -6,8 +6,6 @@ Creation-Date: 2023-02-03T22:08:55+02:00
 
 	*todo !! бэкапы с RSync
 
-https://wiki.omv-extras.org/doku.php?id=omv7:utilities_maint_backup#full_disk_mirroring_backup_with_rsync
-
 1. Определить каталоги для синхронизации
 2. Собрать скрипт синхронизации
 3. Снять файлы с OMV на usb
