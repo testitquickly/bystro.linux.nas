@@ -41,150 +41,6 @@ ZFS явно делали для серверов:
 
 Если не нужны снапшоты и дедупликация, то для хранения фильмов и резервного диска с личными файлами полностью подойдёт ext4. 
 
-В любом случае вот что обязательно надо делать регулярно:
-
-===== Включить жёсткое реагирование на ошибки HDD =====
-
-Можно настроить автоматическое выполнение проверки состояния каждого hdd ДО его монтирования в системе (инициализация партиций), и если возникнут ошибки — диск будет инициализирован в режиме Read only; НО выполняться эта проверка будет только один раз в месяц. 
-
-Но в OMV это нельзя сделать «как обычно» через файл ''/etc/fstab'' — OMV перезаписывает его по своему усмотрению, и редактировать его напрямую не надо. 
-
-
-
-Вот как можно сделать:
-
-
-''lsblk -f''
-
-Отсюда взять UUID для каждого HDD в NAS.
-
-Настроить tune2fs для интервала автопроверки — раз в месяц (1m) без учета количества монтирований:
-
-''sudo tune2fs -i 1m -c 0'' __''HDD_UUID''__
-
-Выполнить эту команду для каждого HDD.
-
-''sudo mcedit /etc/fstab''
-
-__''HDD_UUID''__=1234-ABCD /mnt/backup  ext4  defaults,errors=remount-ro  0  2
-
-Здесь:
-* defaults = набор стандартных опций (варианты — rw, suid, dev, exec, auto, nouser, async).
-* errors=remount-ro = если в ФС возникнет ошибка, смонтировать её в режиме read-only (только чтение), чтобы не усугубить проблему.
-* 0 — участвует ли этот раздел в dump (резервное копирование старой утилитой dump). Обычно 0 (не участвует). 0 нет, 1 да.
-* 2 — порядок проверки fsck при загрузке:
-	* 0 = не проверять.
-	* 1 = корневой раздел (/), проверяется первым.
-	* 2 = все остальные, проверяются после корневого; на скорость загрузки это не влияет.
-
-
-
-
-
-
-
-опцию errors=remount-ro, чтобы при ошибках диск автоматически переходил в режим «только чтение», но при этом выполнять эту операцию  
-прописать в fstab 
-
-
-
-загрузиться с флэшки с Debian Live.
-на диске, с которого загружается OMV, найти /etc/fstab
-добавить для каждого hdd инструкцию “''errors=remount-ro  0 2''”. Пример:
-
-'''
-/dev/sdX1  /mnt/backup  ext4  defaults,errors=remount-ro  0 2
-'''
-
-Здесь:
-* defaults = набор стандартных опций (rw, suid, dev, exec, auto, nouser, async).
-* errors=remount-ro = если в ФС возникнет ошибка, смонтировать её в режиме read-only (только чтение), чтобы не усугубить проблему.
-* 0 — участвует ли этот раздел в dump (резервное копирование старой утилитой dump). Обычно 0 (не участвует). 0 нет, 1 да.
-* 2 — порядок проверки fsck при загрузке:
-	* 0 = не проверять.
-	* 1 = корневой раздел (/), проверяется первым.
-	* 2 = все остальные, проверяются после корневого.
-
-Вместо ''/dev/sdX1'' лучше указывать UUID, чтобы избежать вероятности сбоя при смене дисков.
-
-Выйти и загрузить OMV в штатном режиме.
-
-
-==== Как это всё проверять ====
-
-Сделать файл 
-
-''mcedit check_hdd_read_only.sh''
-
-Вставить текст
-
-{{{code: id="check_hdd_read_only.sh" lang="sh" linenumbers="True"
-!/bin/bash
-
-    # После каждой загрузки NAS происходит инициализация партиций на всех
-    # HDD. Раз в месяц происходит автоматическая проверка состояния дисков.
-    # Если обнаружен сбой, партиции на HDD будут инициализированы в режиме
-    # ReadOnly. 
-
-    # Этот скрипт выполняется после каждой загрузки NAS. Он быстро
-    # проверяет состояние всех дисков. Если какой-то из них загружен в RO,
-    # сообщение об этом записывается в файл todo.txt в профиле юзера tower и
-    # дежурно выводится в консоль при каждом подключении по ssh и прочитывании
-    # содержимого файла .bashrc
-
-    # Файл todo
-TODO_FILE="/srv/dev-disk-by-uuid-9b3771d9-c454-4acd-b683-568da8815820/users/tower/todo.txt"
-
-    # Проверяем опции монтирования всех HDD/SSD
-
-    # findmnt выводит (HUGE!) таблицу блочных устройств с указанными колонками:
-    # имя, точка монтирования, RO, тип ФС и размер.
-
-    # awk ищет все HDD (только вращающиеся диски с параметром ROTA=1, это шестой номер по счету, поэтому алерт на $6==1),
-    # и если у диска в списке найденных есть параметр RO (3==1), то к этой строке приписывается маркер <-- READ-ONLY
-
-    # | while read line; do … done — перебирает каждую полученную строку.
-
-    # если строка помечена <-- READ-ONLY, выполняем запись о ней в TODO_FILE
-
-lsblk -o NAME,MOUNTPOINT,RO,FSTYPE,SIZE,ROTA \
-| awk '$6==1 {print $0, ($3==1 ? "<-- READ-ONLY" : "")}' \
-| while read -r line; do
-    if echo "$line" | grep -q "<-- READ-ONLY"; then
-        echo -e "\n ВНИМАНИЕ! HDD загружен в режиме READ-ONLY:\n $line \n" >> "$TODO_FILE"
-    fi
-done
-
-}}}
-
-Сохранить, выйти.  И сделать его исполняемым
-
-''sudo chmod +x check_hdd_read_only.sh''
-
-Открыть файл (если файла нет — надо создать):
-
-'''
-sudo mcedit /etc/rc.local
-'''
-
-Указать полный путь к скрипту (можно выявить по ''pwd''), и он будет выполняться при каждой загрузке системы
-
-{{{code: id="rc.local" lang="sh" linenumbers="True"
-#!/bin/bash
-
-# Проверка HDD на read-only после загрузки OMV
-/full/path/check_hdd_read_only.sh
-
-exit 0
-
-}}}
-
-Обязательно последней строкой указать ''exit 0''
-
-Сделать файл исполняемым:
-
-''sudo chmod +x /etc/rc.local''
-
 ===== Регулярно копировать «личные файлы» на внешний носитель =====
 
 ''rsync -av --delete /mnt/backup/ /media/usb/backup_copy/''
@@ -192,4 +48,240 @@ exit 0
 ===== Выполнять принудительную проверку файловой системы =====
 
 Например, раз в квартал…
+
+===== Включить жёсткое реагирование на ошибки HDD =====
+
+Можно настроить автоматическое выполнение проверки состояния каждого hdd ДО его монтирования в системе (инициализация партиций), и если возникнут ошибки — диск будет инициализирован в режиме Read only; НО выполняться эта проверка будет только один раз в месяц. 
+
+Но в OMV это нельзя сделать «как обычно» через файл ''/etc/fstab'' — OMV перезаписывает его по своему усмотрению, и редактировать его напрямую не надо. 
+
+Можно настроить выполнение раз в два месяца перед загрузкой OMV проверку состояния HDD (тех, на которых данные на файловой системе ext4). Если какой-то из HDD ответит ошибками, тогда 
+* его партиция/и будет примонтирована в режиме READ ONLY,
+* на системном диске появится файл “''/run/alert_about_hdd.txt''” (далее всюду ''TMP_FILE''), в который будет записано сообщение о том, что «//[HDD ERROR] /dev/$name загружен в режиме ReadOnly//».
+
+После каждой загрузки NAS выполняется одноразовая проверка содержимого ''TMP_FILE''. Если файл существует, его содержимое будет дописано в ''TODO_FILE'' (находится в профиле моего пользователя на NAS). После логина на NAS через SSH в консоль выводится содержимое ''TODO_FILE'', и если в нём появится сообщение «//[HDD ERROR] /dev/$name загружен в режиме ReadOnly//» — я буду знать о проблеме и приму меры.
+
+Скрипты sh должны находиться в ''/usr/local/sbin/'' — это каталог для системных утилит и админских программы, которые требуют root-доступ. Например, скрипты для управления дисками, сетевыми интерфейсами, службами. В тот же /usr/local/bin можно положить исполняемые скрипты для обычных пользователей.
+
+==== Поднять сервис для проверки HDD перед запуском OMV ====
+
+Будет работать только если userspace находится на внешнем носителе [[Users:Сделать “User home directory”]] , потому что если каталог ''users'' будет на одном из внутренних hdd, этот hdd не будет размонтирован, как полагается, и будет таким образом исключен из общей проверки дисков. Останется только возможность [[Загрузить Debian Live с USB]].
+
+=== Сделать скрипт ===
+
+Будет запускаться из одноименного сервиса.
+
+''sudo mcedit /usr/local/sbin/check_hdd_before_omv_mounts.sh''
+
+{{{code: id="check_hdd" lang="sh" linenumbers="True"
+#!/bin/bash
+
+    # Скрипт проверки HDD перед монтированием OMV
+    # Все сообщения записываются во временный файл /run/alert_about_hdd_readonly.txt
+    # Массив found_hdds хранит все найденные HDD
+
+set -e
+
+TMP_FILE="/run/alert_about_hdd_readonly.txt"
+
+    # объявление функции
+found_hdds=()
+
+#  ---- Функция отчёта ----
+report_found_hdds() {
+    local -n hdds=$1   # передаём массив по ссылке
+    if [ ${#hdds[@]} -gt 0 ]; then
+        {
+            echo "# Отчёт о найденных HDD"
+            echo "[INFO] Найденные HDD с ext4:"
+            for hdd in "${hdds[@]}"; do
+                echo "  $hdd"
+            done
+        } >> "$TMP_FILE"
+    fi
+}
+
+    # сделать файл для контроля даты запуска скрипта
+STATE_FILE="/root/timer_check_hdd_before_omv_mounts.txt"
+
+month=$(date +%m)
+current_run="$(date +%Y-%m)"
+
+    # Этот скрипт будет запускаться только в чётные месяцы (раз в два месяца)
+if (( month % 2 != 0 )); then
+    # echo "[INFO] Пропускаем — месяц нечётный ($month)" >> "$TMP_FILE"
+    exit 0
+fi
+
+    # Если уже запускали в этом месяце — выйти. Если нет — выполнить один раз.
+if [[ -f "$STATE_FILE" ]] && grep -q "^$current_run$" "$STATE_FILE"; then
+    # echo "[INFO] Уже выполнялся в этом месяце ($current_run)" >> "$TMP_FILE"
+    exit 0
+fi
+
+# Перебираем все устройства
+while read -r name fstype rota label; do
+    # Только HDD ext4
+    if [ "$fstype" != "ext4" ] || [ "$rota" != "1" ]; then
+        continue
+    fi
+
+    # Исключаем Debian Live флэшку
+    if [[ "$label" == d-live* ]]; then
+        continue
+    fi
+
+    part="/dev/$name"
+    found_hdds+=("$part")
+
+    # Проверка состояния раздела
+    fsck -n -f "$part" >/tmp/fsck_check.log 2>&1
+
+    if grep -q "clean=0" /tmp/fsck_check.log; then
+        echo "[HDD ERROR] $part загружен в режиме ReadOnly" >> "$TMP_FILE"
+    fi
+done < <(lsblk -nr -o NAME,FSTYPE,ROTA,LABEL)
+
+echo "$current_run" > "$STATE_FILE"
+
+    # Вызов функции отчёта
+report_found_hdds found_hdds
+
+}}}
+
+Сделать его исполняемым
+
+''sudo chmod +x /usr/local/sbin/check_hdd_before_omv_mounts.sh''
+
+=== Сделать сервис ===
+
+Выполняется один раз при включении компьютера (Type=oneshot) до того, как будут инициализированы партиции на дисках (Before=local-fs.target).
+
+''sudo mcedit /etc/systemd/system/check_hdd_before_omv_mounts.service''
+
+{{{code: id="hdd_service" lang="sh" linenumbers="True"
+[Unit]
+Description=Check HDD before OMV mounts
+DefaultDependencies=no
+Before=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/check_hdd_before_omv_mounts.sh
+
+[Install]
+WantedBy=multi-user.target
+
+}}}
+
+Активировать:
+
+'''
+sudo systemctl daemon-reload
+sudo systemctl enable check_hdd_before_omv_mounts.service
+sudo systemctl start check_hdd_before_omv_mounts.service
+sudo systemctl status check_hdd_before_omv_mounts.service
+'''
+
+В ответ ожидаем что-то вроде 
+
+''Loaded:'' __''loaded''__ ''(/etc/systemd/system/check_hdd_before_omv_mounts.service;'' __''enabled''__''; preset:'' __''enabled''__'')''
+''Active:'' __''inactive''__ ''(dead) since Mon 2025-08-25 04:43:11 EEST; 4s ago''
+
+Юнит корректно деактивировался после выполнения (inactive (dead)). Он же одноразовый.
+
+==== Поднять сервис для алертов юзера tower ====
+
+=== Сделать скрипт ===
+
+''sudo mcedit /usr/local/sbin/get_alert_about_hdd_readonly.sh''
+
+{{{code: id="qwe" lang="sh" linenumbers="True"
+#!/bin/bash
+
+    # После инициализации системы надо проверить наличие TMP_FILE
+    # Если он есть — дописать его содержимое в TODO_FILE
+
+    # TMP_FILE создан на временной файловой системе и исчезнет после выключения NAS
+
+TMP_FILE="/run/alert_about_hdd_readonly.txt"
+TODO_FILE="/user/todo.txt"
+
+    # дежурная проверка на наличие TMP_FILE (надеемся, что его нет)
+if [ -s "$TMP_FILE" ]; then
+    cat "$TMP_FILE" >> "$TODO_FILE"
+fi
+
+}}}
+
+''sudo chmod +x /usr/local/sbin/get_alert_about_hdd_readonly.sh''
+
+=== Сделать сервис ===
+
+Сервис выполняется один раз после инициализации всех дисков.
+
+'''
+sudo mcedit /etc/systemd/system/get_alert_about_hdd_readonly.service
+'''
+
+{{{code: id="ds" lang="sh" linenumbers="True"
+[Unit] 
+Description=Alert user if there is a message in file /run/message_about_hdd.txt
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/get_alert_about_hdd_readonly.sh
+
+[Install]
+WantedBy=multi-user.target
+
+}}}
+
+'''
+sudo systemctl daemon-reload
+sudo systemctl enable get_alert_about_hdd_readonly.service
+sudo systemctl start get_alert_about_hdd_readonly.service
+sudo systemctl status get_alert_about_hdd_readonly.service
+'''
+
+==== Поднять сервис с таймером для check_hdd_before_omv_mounts ====
+
+''sudo mcedit /etc/systemd/system/check_hdd_before_omv_mounts.timer''
+
+{{{code: id="timer" lang="sh" linenumbers="True"
+[Unit]
+Description=Run OMV HDD check monthly
+
+[Timer]
+Unit=check_hdd_before_omv_mounts.service
+OnCalendar=*-01-00:00:00/2
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+
+}}}
+
+Активация
+
+'''
+sudo systemctl daemon-reload
+sudo systemctl enable check_hdd_before_omv_mounts.timer
+sudo systemctl start check_hdd_before_omv_mounts.timer
+sudo systemctl status check_hdd_before_omv_mounts.timer
+'''
+
+Ожидаемый ответ: ''Active: active (waiting)''
+
+==== Удалить сервис ====
+
+На всякий случай
+
+'''
+sudo systemctl stop abc.service
+sudo systemctl disable abc.service
+sudo systemctl status abc.service
+rm /etc/systemd/system/abc.service
+'''
 

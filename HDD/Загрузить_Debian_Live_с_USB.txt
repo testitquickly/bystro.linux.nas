@@ -2,7 +2,7 @@ Content-Type: text/x-zim-wiki
 Wiki-Format: zim 0.6
 Creation-Date: 2025-08-21T20:43:20+03:00
 
-====== Загрузиться с Debian Live USB ======
+====== Загрузить Debian Live с USB ======
 
 ===== Сделать Live Debian USB =====
 
