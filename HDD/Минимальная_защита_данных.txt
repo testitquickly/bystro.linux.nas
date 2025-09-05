@@ -190,61 +190,6 @@ sudo systemctl status check_hdd_before_omv_mounts.service
 
 Юнит корректно деактивировался после выполнения (inactive (dead)). Он же одноразовый.
 
-==== Поднять сервис для алертов юзера tower ====
-
-=== Сделать скрипт ===
-
-''sudo mcedit /usr/local/sbin/get_alert_about_hdd_readonly.sh''
-
-{{{code: id="qwe" lang="sh" linenumbers="True"
-#!/bin/bash
-
-    # После инициализации системы надо проверить наличие TMP_FILE
-    # Если он есть — дописать его содержимое в TODO_FILE
-
-    # TMP_FILE создан на временной файловой системе и исчезнет после выключения NAS
-
-TMP_FILE="/run/alert_about_hdd_readonly.txt"
-TODO_FILE="/user/todo.txt"
-
-    # дежурная проверка на наличие TMP_FILE (надеемся, что его нет)
-if [ -s "$TMP_FILE" ]; then
-    cat "$TMP_FILE" >> "$TODO_FILE"
-fi
-
-}}}
-
-''sudo chmod +x /usr/local/sbin/get_alert_about_hdd_readonly.sh''
-
-=== Сделать сервис ===
-
-Сервис выполняется один раз после инициализации всех дисков.
-
-'''
-sudo mcedit /etc/systemd/system/get_alert_about_hdd_readonly.service
-'''
-
-{{{code: id="ds" lang="sh" linenumbers="True"
-[Unit] 
-Description=Alert user if there is a message in file /run/message_about_hdd.txt
-After=local-fs.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/sbin/get_alert_about_hdd_readonly.sh
-
-[Install]
-WantedBy=multi-user.target
-
-}}}
-
-'''
-sudo systemctl daemon-reload
-sudo systemctl enable get_alert_about_hdd_readonly.service
-sudo systemctl start get_alert_about_hdd_readonly.service
-sudo systemctl status get_alert_about_hdd_readonly.service
-'''
-
 ==== Поднять сервис с таймером для check_hdd_before_omv_mounts ====
 
 ''sudo mcedit /etc/systemd/system/check_hdd_before_omv_mounts.timer''
@@ -274,7 +219,62 @@ sudo systemctl status check_hdd_before_omv_mounts.timer
 
 Ожидаемый ответ: ''Active: active (waiting)''
 
-==== Удалить сервис ====
+==== Поднять сервис для алертов про R/O диск ====
+
+=== Сделать скрипт ===
+
+''sudo mcedit /usr/local/sbin/check_hdd_get_alert_about_hdd_readonly.sh''
+
+{{{code: id="qwe" lang="sh" linenumbers="True"
+#!/bin/bash
+
+    # После инициализации системы надо проверить наличие TMP_FILE
+    # Если он есть — дописать его содержимое в TODO_FILE
+
+    # TMP_FILE создан на временной файловой системе и исчезнет после выключения NAS
+
+TMP_FILE="/run/alert_about_hdd_readonly.txt"
+TODO_FILE="/user/todo.txt"
+
+    # дежурная проверка на наличие TMP_FILE (надеемся, что его нет)
+if [ -s "$TMP_FILE" ]; then
+    cat "$TMP_FILE" >> "$TODO_FILE"
+fi
+
+}}}
+
+''sudo chmod +x /usr/local/sbin/check_hdd_get_alert_about_hdd_readonly.sh''
+
+=== Сделать сервис ===
+
+Сервис выполняется один раз после инициализации всех дисков.
+
+'''
+sudo mcedit /etc/systemd/system/check_hdd_get_alert_about_hdd_readonly.service
+'''
+
+{{{code: id="ds" lang="sh" linenumbers="True"
+[Unit] 
+Description=Alert user if there is a message in file /run/message_about_hdd.txt
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/check_hdd_get_alert_about_hdd_readonly.sh
+
+[Install]
+WantedBy=multi-user.target
+
+}}}
+
+'''
+sudo systemctl daemon-reload
+sudo systemctl enable check_hdd_get_alert_about_hdd_readonly.service
+sudo systemctl start check_hdd_get_alert_about_hdd_readonly.service
+sudo systemctl status check_hdd_get_alert_about_hdd_readonly.service
+'''
+
+===== Удалить (любой) сервис =====
 
 На всякий случай
 
@@ -285,3 +285,4 @@ sudo systemctl status abc.service
 rm /etc/systemd/system/abc.service
 '''
 
+Также см. [[Приложения:Запуск скриптов при загрузке системы]]

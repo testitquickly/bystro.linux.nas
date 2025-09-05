@@ -4,25 +4,109 @@ Creation-Date: 2025-08-25T06:25:39+03:00
 
 ====== Запуск скриптов при загрузке системы ======
 
-Сделать все свои скрипты и положить их в отдельный каталог.
+Раньше для этого использовался общий файл sudo mcedit /etc/rc.local, но сейчас рекомендуется делать сервисы через systemd.
 
-Сделать файл:
+==== Пример сервиса abc ====
 
-'''
-sudo mcedit /etc/rc.local
-'''
+=== Сделать скрипт ===
 
-Записать в этот файл построчно адреса всех скриптов, которые надо запускать:
+Его можно сразу создать в
 
-{{{code: id="rc.local" lang="sh" linenumbers="True"
+''sudo mcedit /usr/local/sbin/abc.sh''
+
+Или сделать его в своём профиле, а в ''/usr/local/sbin/'' сделать на него симлинк. Второе надежнее — если системный диск умрёт, то скрипты останутся на HDD. Но могут возникнуть нюансы, 
+
+{{{code: id="qwe" lang="sh" linenumbers="True"
 #!/bin/bash
-/srv/………/myScripts/file1.sh
-/srv/………/myScripts/file2.sh
-exit 0
+
+    # Это пример
+    # Скрипт запускается из /usr/local/sbin
+    
+echo "Скрипт для примера"
 }}}
 
-Чтобы не прерывать загрузку системы, надо обязательно указать успешное завершение скрипта без ошибок “''exit 0''” на случай, если какой-то скрипт исчезнет. 
+''sudo chmod +x /usr/local/sbin/abc.sh''
 
-Сделать файл исполняемым:
+=== Сделать сервис ===
 
-''sudo chmod +x /etc/rc.local''
+Сервис должен называться так же, как и скрипт — чтобы позже было проще в них разобраться.
+
+Создать файл сервиса:
+
+'''
+sudo mcedit /etc/systemd/system/abc.service
+'''
+
+В него записать:
+
+{{{code: id="ds" lang="sh" linenumbers="True"
+[Unit] 
+Description=Some description
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/abc.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+}}}
+
+=== Опциональное ===
+
+Если надо, чтобы скрипт запустился только после монтирования определенного носителя (например, его ''uuid'' начинается с “b75b5bea”), надо сперва узнать, как systemd этот носитель идентифицирует:
+
+''systemctl list-units --type=mount | grep b75b5''
+
+Пример ответа
+
+''srv-dev\x2ddisk\x2dby\x2duuid\x2db75b5bea\x2d8b3b\x2d41e7\x2da919\x2d3c523828ba56.mount''
+''loaded active mounted /srv/dev-disk-by-uuid-b75b5bea-8b3b-41e7-a919-3c523828ba56''
+
+В первой строке идентификатор (он может быть очень неочевидным). Во второй  — предупреждение о том, что данный носитель в данный момент используется.
+
+Добавить в файл сервиса указания о том, что скрипт должен быть запущен от имени root только после появления в системе определенного носителя:
+
+
+{{{code: id="ds" lang="sh" linenumbers="True"
+[Unit] 
+Description=Some description
+After=srv-dev\x2ddisk\x2dby\x2duuid\x2db75b5bea\x2d8b3b\x2d41e7\x2da919-3c523828ba56.mount
+Requires=srv-dev\x2ddisk\x2dby\x2duuid\x2db75b5bea\x2d8b3b\x2d41e7\x2da919-3c523828ba56.mount
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/abc.sh
+User=root
+Group=root
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+}}}
+
+* After — сервис ждёт, пока флешка примонтируется.
+* Requires — если монтирование не сработало, сервис тоже не запустится.
+
+==== Запустить сервис ====
+
+'''
+sudo systemctl daemon-reload
+sudo systemctl enable abc.service
+sudo systemctl start abc.service
+sudo systemctl status abc.service
+'''
+
+===== Удалить сервис =====
+
+Нельзя просто удалить файлы сервиса. Сперва его надо погасить.
+
+'''
+sudo systemctl stop abc.service
+sudo systemctl disable abc.service
+sudo systemctl status abc.service
+rm /etc/systemd/system/abc.service
+'''
