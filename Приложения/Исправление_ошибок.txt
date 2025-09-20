@@ -3,5 +3,82 @@ Wiki-Format: zim 0.6
 Creation-Date: 2025-09-20T18:09:23+03:00
 
 ====== Исправление ошибок ======
-Создан Суббота 20 сентября 2025
+
+===== ipmi:dmi: Base address is zero, assuming no IPMI interface =====
+
+Это не ошибка в работе сервера, а уведомление ядра: оно попыталось найти аппаратный интерфейс IPMI (обычно у серверных плат с BMC/iLO/iDRAC), но не нашло.
+
+Можно «заглушить» загрузку драйвера IPMI:
+
+''echo "blacklist ipmi_si" | sudo tee /etc/modprobe.d/blacklist-ipmi.conf''
+
+Обновить initramfs, чтобы на старте модули не подтягивались:
+
+''sudo update-initramfs -u''
+
+Заработает после перезагрузки сервера.
+
+===== kernel: ERST: Failed to get Error Log Address Range. =====
+
+ERST = Error Record Serialization Table (часть ACPI для хранения логов ошибок). Можно игнорировать. Это не ошибка железа, а просто отсутствующая функция. У большинства десктопных/обычных серверных плат эта таблица не реализована, поэтому ядро пишет предупреждение. 
+
+===== scsi 6:0:0:1: Failed to get diagnostic page 0x1 =====
+
+А также
+
+'''
+scsi 6:0:0:1: Failed to bind enclosure -19
+'''
+
+Это сообщения от драйвера SCSI/USB-SATA адаптера. Они означают, что какое-то устройство, например, USB, на котором находится /home/users, не поддерживает расширенные SCSI-команды для «enclosure management» (диагностические страницы SMART/SES).
+
+Если диск работает нормально (виден, читается/пишется) → можно игнорировать.
+
+Если хочется убрать сообщения — можно отключить загрузку модуля ses (enclosure services):
+
+'''
+echo "blacklist ses" | sudo tee /etc/modprobe.d/blacklist-ses.conf
+'''
+
+'''
+sudo update-initramfs -u
+'''
+
+'''
+sudo reboot
+'''
+
+Это значит, что в зависимостях юнитов (.service, .target) обнаружен цикл:
+
+network.target ждёт wpa_supplicant.service или systemd-resolved.service,
+
+а они, в свою очередь, через свои зависимости зависят от network.target.
+
+===== network.target: Job wpa_supplicant.service/start deleted to break ordering cycle starting with network.target/start =====
+
+А также 
+
+''network.target: Job systemd-resolved.service/start deleted to break ordering cycle starting with network.target/start''
+
+В OMV (OpenMediaVault) по умолчанию:
+
+1. сетью управляет **systemd-networkd**,
+2. ''systemd-resolved'' обычно включён для DNS,
+3. ''wpa_supplicant'' нужен только если сервер подключается к Wi-Fi (что редкость для NAS).
+
+wpa_supplicant: OMV-серверу обычно не нужен, потому что Wi-Fi не используется. Лучше просто отключить:
+
+''sudo systemctl disable --now wpa_supplicant''
+
+==== systemd-resolved ====
+
+Сперва посмотреть, что именно используется, локальный systemd-resolved для DNS от OMV или настроен свой DNS (например, через роутер или dnsmasq).
+
+''resolvectl status''
+
+Ответ надо уметь прочитать правильно, но в принципе я не настраивал отдельный DNS, поэтому мне очевидно, что работает OMV.
+
+Переуточнить запуск правильного сетевого стека:
+
+''sudo systemctl enable --now systemd-networkd && sudo systemctl enable --now systemd-resolved''
 
