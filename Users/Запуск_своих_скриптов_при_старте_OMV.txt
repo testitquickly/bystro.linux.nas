@@ -1,0 +1,7 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.6
+Creation-Date: 2025-11-22T04:25:55+02:00
+
+====== Запуск своих скриптов при старте OMV ======
+Создан Суббота 22 ноября 2025
+
