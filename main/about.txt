@@ -4,20 +4,15 @@ Creation-Date: 2024-11-02T11:57:49+02:00
 
 ====== about ======
 
-Здесь собран набор подсказок/инструкций для установки, переустановки и настройки NAS под OMV.
+Здесь собран набор подсказок/инструкций для установки, переустановки и настройки NAS (Network Attached Storage) под OMV (OpenMediaVault, основан на Debian).
 
-	* NAS — Network Attached Storage
-	* OMV — OpenMediaVault, основан на Debian.
-
-Местами подсказки получились короткие и внятные, местами очень обширные, на уровне объяснения (если сам себе всё понятно объяснил, значит — понял). Когда ошибся — переписываю, иногда чуть менее, чем полностью.
-
-Изначально всё организовано в десктоп-wiki редакторе [[bystro.linux?Software:Zim]] Файлы блокнота можно снять с https://github.com/testitquickly/bystro.linux.nas/
+Файлы блокнота — https://github.com/testitquickly/bystro.linux.nas/
 
 Если кому-то это всё тоже будет полезно — велком.
 
 ===== Навигация =====
 
-Выстроена через индекс страниц — https://testitquickly.com/bystro.linux.nas/
+Через файл //main// — https://testitquickly.com/bystro.linux.nas/
 
 ===== Автор =====
 

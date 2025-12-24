@@ -120,8 +120,6 @@ done
 
 ''fsck.ext4 -f /dev/sda1'' и так далее
 
-
-
 ==== Регулярно копировать «личные файлы» на внешний носитель ====
 
 ''rsync -av --delete /mnt/backup/ /media/usb/backup_copy/''

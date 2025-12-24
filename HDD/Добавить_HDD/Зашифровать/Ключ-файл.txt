@@ -6,9 +6,9 @@ Creation-Date: 2025-11-07T16:23:50+02:00
 
 Удобно открывать зашифрованную партицию на HDD через файл-ключ, чтобы не запоминать и вводить пароль от каждого криптоконтейнера, особенно если их много.
 
-===== Разрешить юзеру NAS сверхправа =====
+===== Разрешить юзеру NAS некоторые сверхправа =====
 
-Не совсем секьюрно, но можно разрешить своему юзеру выполнять некоторые команды sudo без запроса пароля. 
+Не совсем секьюрно, но сперва надо будет разрешить своему юзеру на NAS выполнять некоторые команды sudo без запроса пароля. 
 
 '''
 sudo visudo
@@ -42,7 +42,17 @@ __''имя_юзера''__ ''ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup
 
 ===== Создать ключ для LUKS =====
 
-''sudo dd if=/dev/random of=/root/enc_wd_red_6tb.key bs=64 count=1''
+Дико несекьюрно, но можно хранить ключи на NAS:
+
+'''
+sudo mkdir -m 700 /etc/keys
+'''
+
+Можно назвать этот каталог рэндомными буквами, но путь к ключам в этом каталоге будет открыто прописан в скриптах .''sh'' в профиле юзера для быстрого/автоматического подключения криптоконтейнеров. Если уже надо по-настоящему секьюрить, то хранить файл-ключ следует вовне NAS, или на флэшке (которую легко проглотить), или на своём ноуте (который тоже должно быть легко проглотить и переварить). А если надо будет открывать контейнер прямо на NAS, то можно же с NAS на свой ноут метнуться через SCP и скопировать ключ в /tmp NAS — см. далее пример такого скрипта…
+
+Создать ключ для криптоконтейнера методом хаотичного генерирования символов. Имя ключа задать по имени криптоконтейнера, который этот ключ будет обслуживать:
+
+''sudo dd if=/dev/random of=/etc/keys/enc_wd_red_6tb.key bs=64 count=1''
 
 Нормальный ответ выглядит примерно так:
 
@@ -50,13 +60,17 @@ __''имя_юзера''__ ''ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup
 ''1+0 records out''
 ''64 bytes copied, 0,000503045 s, 127 kB/s''
 
-Появляется файл ''/root/enc_wd_red_6tb.key'' с сакральной абракадаброй внутри, и его владелец ''root''.
+Ключ-файл с сакральной абракадаброй внутри создан.
+
+Переключиться под ''root'' и прописать ему правильные права:
+
+''chown root:root /etc/keys/enc_wd_red_6tb.key && chmod 600 /etc/keys/enc_wd_red_6tb.key''
 
 ===== Добавить файл-ключ в слот криптоконтейнера =====
 
-Контейнер при этом может быть и закрыт, это нормально. 
+Контейнер при этом может быть и закрыт, это нормально. Обращение к криптоконтейнеру происходит по его PARTUUID (его надо знать заранее):
 
-''sudo cryptsetup luksAddKey /dev/sdb2 /root/enc_wd_red_6tb.key''
+''sudo cryptsetup luksAddKey /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055 /etc/keys/enc_wd_red_6tb.key''
 
 Будет запрошена парольная фраза для криптоконтейнера и ключ будет добавлен в первый свободный слот.
 
@@ -66,7 +80,7 @@ __''имя_юзера''__ ''ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup
 
 Узнать, какой слот уже занят ключом:
 
-''sudo cryptsetup luksDump /dev/sdb2''
+''sudo cryptsetup luksDump /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055''
 
 Например, вот так отображаются два занятых слота:
 
@@ -128,15 +142,18 @@ __''имя_юзера''__ ''ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup
 #!/bin/bash
 
     # монтировать локально каталог из зашифрованной партиции на NAS
-    # для моего юзера на NAS уже добавлено через sudo visudo глобальное 
-        # разрешение на выполнение команд, которые выполняются в этом скрипте:
-        # tower ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup, /bin/mount, /bin/umount
+    # для моего юзера на NAS уже добавлено через sudo visudo глобальное
+    # разрешение на выполнение команд, которые выполняются в этом скрипте:
+    # tower ALL=(ALL) NOPASSWD: /sbin/shutdown, /sbin/cryptsetup, /bin/mount, /bin/umount
     # и файл-ключ уже добавлен в слот криптоконтейнера
 
-    # глобальный файл с переменными
-. /home/mySettings/myScripts/_common/variables.var
+    # глобальный файл с переменными:
+    # nas_ip
+    # nas_host
+    # ssh_keys
+. /home/mySettings/myScripts/_variables.var
 
-NAS_CONTAINER_PLACE=/dev/sdb2
+NAS_CONTAINER_HDD=/dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055
 NAS_CONTAINER_NAME=enc_wd_red_6tb
 NAS_MOUNT_POINT=/srv/dev-disk-by-uuid-006tbhdd-r34f-q3r4-6b78-pc45fb2ks921
 NAS_FOLDER_NAME=enc_wd_red_6tb
@@ -145,25 +162,25 @@ LOCAL_ENCRYPTED_KEY_FILE=/home/mySettings/keys/nas_encrypted/enc_wd_red_6tb.key
 LOCAL_MOUNT_POINT=/home/nas/enc_wd_red_6tb
 
     # Проверить доступность сервера
-ping -c1 -W1 $NAS_IP >/dev/null 2>&1
+ping -c1 -W1 $nas_ip >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-    echo -e "\n\tОшибка! $NAS_IP недоступен\n"
+    echo -e "\n\tОшибка! $nas_ip недоступен\n"
     exit 1
 fi
 
 echo -e " "
 
 # NAS: Передал ключ-файл в /tmp через SCP
-scp -i /home/mySettings/keys/ssh/nas/nas_tower $LOCAL_ENCRYPTED_KEY_FILE tower@$NAS_IP:/tmp/luks.key
+scp -i $ssh_key $LOCAL_ENCRYPTED_KEY_FILE $nas_host:/tmp/luks.key
 
-ssh tower@$NAS_IP -i /home/mySettings/keys/ssh/nas/nas_tower "sudo cryptsetup open $NAS_CONTAINER_PLACE $NAS_CONTAINER_NAME --key-file=/tmp/luks.key && shred -u /tmp/luks.key"
+ssh $nas_host -i $ssh_key "sudo cryptsetup open $NAS_CONTAINER_HDD $NAS_CONTAINER_NAME --key-file=/tmp/luks.key && shred -u /tmp/luks.key"
 echo -e "\n\tNAS: Открыл криптоконтейнер на NAS через ключ-файл из /tmp. Ключ сразу был уничтожен"
 
-ssh tower@$NAS_IP -i /home/mySettings/keys/ssh/nas/nas_tower "sudo mount /dev/mapper/$NAS_CONTAINER_NAME $NAS_MOUNT_POINT"
+ssh $nas_host -i $ssh_key "sudo mount /dev/mapper/$NAS_CONTAINER_NAME $NAS_MOUNT_POINT"
 echo -e "\n\tNAS: Примонтировал зашифрованную партицию в криптоконтейнер"
 
 if sshfs -o reconnect,ServerAliveInterval=15,IdentityFile=/home/mySettings/keys/ssh/nas/nas_tower \
-      tower@$NAS_IP:$NAS_MOUNT_POINT/$NAS_FOLDER_NAME $LOCAL_MOUNT_POINT; then
+      $nas_host:$NAS_MOUNT_POINT/$NAS_FOLDER_NAME $LOCAL_MOUNT_POINT; then
     echo -e "\n\tФайлы доступны в $LOCAL_MOUNT_POINT \n"
 else
     echo "\n\tОшибка монтирования SSHFS\n"
@@ -188,12 +205,10 @@ NAS_CONTAINER_NAME=enc_wd_red_6tb
 LOCAL_MOUNT_POINT=/home/nas/enc_wd_red_6tb
 
     # Размонтировать зашифрованную партицию на NAS и закрыть LUKS
-ssh tower@$NAS_IP -i /home/mySettings/keys/ssh/nas/nas_tower \
-    "sudo umount /dev/mapper/$NAS_CONTAINER_NAME && sudo cryptsetup close $NAS_CONTAINER_NAME"
+ssh $nas_host -i $ssh_key "sudo umount /dev/mapper/$NAS_CONTAINER_NAME && sudo cryptsetup close $NAS_CONTAINER_NAME"
 
     # Убедиться в том, что контейнер на NAS больше не существует
-CONTAINER_EXISTS=$(ssh tower@$NAS_IP -i /home/mySettings/keys/ssh/nas/nas_tower \
-    "if [ -e /dev/mapper/$NAS_CONTAINER_NAME ]; then echo yes; else echo no; fi")
+CONTAINER_EXISTS=$(ssh $nas_host -i $ssh_key "if [ -e /dev/mapper/$NAS_CONTAINER_NAME ]; then echo yes; else echo no; fi")
 
 if [ "$CONTAINER_EXISTS" = "no" ]; then
     # Размонтировать локально
@@ -212,7 +227,7 @@ fi
 
 Номер LUKS-слота можно узнать в любой момент до удаления, с помощью команды:
 
-''sudo cryptsetup luksDump /dev/sdb2''
+''sudo cryptsetup luksDump /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055''
 
  Пример ответа:
 
@@ -241,15 +256,17 @@ DISABLED = пустой слот
 Сперва удалить слот, в который был записан ключ с этой карты. Узнать, какой слот соответствует этому ключу:
 
 '''
-sudo cryptsetup luksDump /dev/sdb2
+sudo cryptsetup luksDump /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055
 '''
 
 Допустим флешка была в слоте 1 → его и удалить:
 
-''cryptsetup luksKillSlot /dev/sdb2 1''
+''cryptsetup luksKillSlot /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055 1''
+или же
+''cryptsetup luksKillSlot /dev/sdb2''
 
 Открыть криптоконтейнер через ручной ввод пароля и создать новый слот для ключа или нового носителя:
 
 '''
-sudo cryptsetup luksAddKey /dev/sdb2 /root/new_key.key
+sudo cryptsetup luksAddKey /dev/disk/by-partuuid/f8c7131b-0d62-9445-9095-cdd773341055 /root/new_key.key
 '''

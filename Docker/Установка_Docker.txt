@@ -59,7 +59,7 @@ Network
 
 ''ssh mydoker@192.168.50.60'' (или какой там IP)
 
-==== Создать shared-каталоги для Docker ====
+==== Создать каталоги для Docker ====
 
 Можно положить их на один диск или на разные — nevermind, но надо учесть, что туда будет записываться много информации, поэтому лучше положить их на hdd с запасом по объёму.
 
@@ -85,16 +85,18 @@ Network
 
 ''mkdir app backup composefiles containers data downloads media''
 
-4. Сделать каждый из этих каталогов shared — [[Shared Folders:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+==== Создать shared-каталоги для Docker ====
+
+См. [[Shared Folders:Добавить shared-каталог]] — с настройками доступа «Everyone read/write».
+
+Надо сделать shared четыре каталога (каталог  “''app''” делать shared не надо):
+
+1. dkr-backup
+2. dkr-composefiles
+3. dkr-containers
+4. dkr-data
 
 Аккуратно к названиям каталогов. В системе не должно быть shared-каталогов с идентичным названием, даже если они «смотрят» в разные места. Разумно назвать докеровские shared-каталоги с приставкой вроде „''dkr''”:
-
-1. dkr.backup
-2. dkr.composefiles
-3. dkr.containers
-4. dkr.data
-
-Каталог  “''app''” делать shared не надо.
 
 ==== Установить плагины для Docker ====
 
@@ -106,9 +108,10 @@ Network
 
 ''System'' 
 ''> omv-extras''
-''поставить галочку для Docker-repo (вероятно, она уже поставлена)''
 
-Кликнуть по [apt-clean] и дождаться финиша.
+= поставить галочку для “Docker-repo” (вероятно, она уже поставлена) и кликнуть по [apt-clean] и дождаться финиша.
+
+[Save]
 
 === Установить плагин //openmediavault-compose// ===
 
@@ -120,7 +123,7 @@ Network
 
 === Установить плагин //openmediavault-k8s// ===
 
-Это Kubernetes. Опционально, в основе не нужен, буду всё делать через Compose. 
+Не факт, что нужен — это Kubernetes, а я буду всё делать через Compose. 
 
 ''System'' 
 ''> Plugins'' 
@@ -132,19 +135,19 @@ Network
 ''> Compose''
 ''> Settings'' 
 
-Указать shared folder для Compose Files: ''dkr.composefiles''
+Указать shared folder для Compose Files: ''dkr-composefiles''
 	Owner of directories and files = ''mydoker''
 	Group: ''sudo''
 	Permissions of directories and files: ''Administrator - read/write, Users - no access, Others - no access''
 
-Указать shared folder для Data: ''dkr.data''
+Указать shared folder для Data: ''dkк-data''
 
-Указать shared folder для Backup: ''dkr.backup''
+Указать shared folder для Backup: ''dkr-backup''
 
 Указать Docker Storage: 
 	по-умолчанию указано ''/var/lib/docker'' — но там еще ничего нет. Тут надо указать диск и каталог, в котором Docker будет постоянно «жить и работать». Какой каталог будет указан — там и появится Docker. 
 	я уже сделал в каталоге с файлами Docker новый каталог с именем “''app''”.
-	 указать в этом поле что-то вроде ''/srv/dev-disk-by-uuid-a165a938…/docker/app''
+	 указать в этом поле полный путь к нему (вроде) ''/srv/dev-disk-by-uuid-a165a938…/docker/app''
 
 Save.
 
