@@ -18,27 +18,33 @@ Creation-Date: 2023-01-31T14:45:24+02:00
 
 ===== Обновление OMV =====
 
-	Но если это дебиан, то не будет логичным сделать '''apt-get update && apt-get upgrade && apt dist-upgrade'''?
+А если это дебиан, то не будет логичным сделать '''apt-get update && apt-get upgrade && apt dist-upgrade'''?
 
-	Нет.
+Нет.
 
-	„OMV” работает на устаревшем стабледебе, и это правильно. dist-upgrade принесёт обновления из других репозиториев, и OMV почти однозначно разломается, решением будет только переустановка с нуля.
+„OMV” работает на устаревшем стабледебе, и это правильно. dist-upgrade принесёт обновления из других репозиториев, и OMV почти однозначно разломается, решением будет только переустановка с нуля.
 
-	В принципе можно проверить содержимое ''cat /etc/apt/sources.list'' на адекватное содержимое.
+В принципе можно проверить содержимое ''cat /etc/apt/sources.list'' на адекватное содержимое.
 
-1
+==== Проверить плагины ====
+
+Посмотреть список установленных плагинов:
+
+''dpkg -l | grep openmediavault''
+
+Поискать все плагины из своего списка в списке версий плагинов для нового релиза OMV, например, https://wiki.omv-extras.org/doku.php?id=omv8:omv8_plugins:summary_omv8_plugins Если там чего-то нет, обновление лучше отложить.
+
+==== Выполнить обновление ====
 
 ''sudo omv-upgrade''
 
 Если есть ошибки — остановиться и гуглить решения.
 
-	Пример ошибки — [[https://www.cyberciti.biz/faq/the-repository-http-deb-debian-org-debian-buster-backports-release-no-longer-has-a-release-file/|The repository 'http://deb.debian.org/debian buster-backports Release' no longer has a Release file]].
+Пример ошибки — [[https://www.cyberciti.biz/faq/the-repository-http-deb-debian-org-debian-buster-backports-release-no-longer-has-a-release-file/|The repository 'http://deb.debian.org/debian buster-backports Release' no longer has a Release file]].
 
-	Когда всё починено — повторить ''sudo omv-upgrade''
+Когда всё починено — повторить ''sudo omv-upgrade''
 
-2
-
-Это обновление до нового крупного релиза.
+==== Обновиться до нового релиза ====
 
 ''sudo omv-release-upgrade''
 
@@ -48,11 +54,13 @@ Creation-Date: 2023-01-31T14:45:24+02:00
 
 Reboot.
 
-3
-
 В браузере сделать принудительный refresh (Crtl+F5)
 
 Протыкать последовательно все включенные сервисы и docker containers. Если что-то не будет работать, или если будут сообщения про Linux image Updates, которое невозможно установить/обновить через GUI — вернуться в консоль и снова выполнить ''omv-upgrade''.
+
+Или проверить доступность чего-то вроде 
+
+''sudo wget -O - https://raw.githubusercontent.com/OpenMediaVault-Plugin-Developers/installScript/master/fix7to8upgrade | sudo bash''
 
 В будущем разумно обновляться только из веб-интерфейса.
 
