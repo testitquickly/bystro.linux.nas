@@ -75,4 +75,4 @@ As root:
 ''rm aquota.user''
 ''rm aquota.group''
 
-//Next step//: [[main]]
+//Next step//: [[index]]

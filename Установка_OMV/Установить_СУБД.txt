@@ -56,4 +56,4 @@ Reload privilege tables now? [Y/n] Y
 
 Установка OMV закончена.
 
-//Return//: [[main]]
+//Return//: [[index]]

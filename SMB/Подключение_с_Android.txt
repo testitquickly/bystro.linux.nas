@@ -8,4 +8,4 @@ Creation-Date: 2024-11-03T18:20:07+02:00
 
 * «Cx Проводник» (оно же «Cx File Explorer»).
 
-//Next step//: [[main]]
+//Next step//: [[index]]

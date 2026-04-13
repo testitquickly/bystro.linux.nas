@@ -111,4 +111,4 @@ Creation-Date: 2023-02-03T19:22:23+02:00
 
 ''ssh -o "User=bobby" myNAS''
 
-//Next step//: [[main]]
+//Next step//: [[index]]
